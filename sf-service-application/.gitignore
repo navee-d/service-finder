@@ -1,0 +1,3 @@
+# dev profile #
+/src/main/resources/application-development.yml
+/target/

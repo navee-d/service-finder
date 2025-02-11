@@ -1,18 +1,18 @@
 package com.hexalyte.sf_service_application.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
-public record Services(
+@Table(name = "solution")
+public record Solution(
         @Id
-        @Column(name = "ServiceID",columnDefinition = "INT AUTO_INCREMENT")
-        Integer serviceID,
+        @Column(name = "ServiceID")
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        Long serviceID,
 
         @Column(name = "UserID")
         Integer userID,
@@ -23,7 +23,7 @@ public record Services(
         @Column(name = "Description", columnDefinition = "TEXT")
         String description,
 
-        @Column(name = "Price", nullable = false,columnDefinition = "DECIMAL(10,2)")
+        @Column(name = "Price", nullable = false, columnDefinition = "DECIMAL(10,2)")
         Double price,
 
         @Column(name = "EstimatedTime")
@@ -32,11 +32,11 @@ public record Services(
         @Column(name = "ReminderTime", columnDefinition = "TIME")
         LocalTime reminderTime,
 
-        @Column(name = "CreatedAt",columnDefinition = "TIMESTAMP")
+        @Column(name = "CreatedAt", columnDefinition = "TIMESTAMP")
         @ColumnDefault("CURRENT_TIMESTAMP")
         LocalDateTime createdAt,
 
-        @Column(name = "UpdatedAt",columnDefinition = "TIMESTAMP")
+        @Column(name = "UpdatedAt", columnDefinition = "TIMESTAMP")
         @ColumnDefault("CURRENT_TIMESTAMP")
         LocalDateTime updatedAt
 ) {

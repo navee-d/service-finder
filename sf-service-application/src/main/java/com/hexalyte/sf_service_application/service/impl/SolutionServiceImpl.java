@@ -28,13 +28,13 @@ public class SolutionServiceImpl implements SolutionService {
     }
 
     @Override
-    public void addService(Solution solution) {
-        repository.save(solution);
+    public Optional<Solution> addService(Solution solution) {
+        return Optional.of(repository.save(solution));
     }
 
     @Override
-    public void updateService(Solution solution) {
-        repository.save(solution);
+    public Optional<Solution> updateService(Solution solution) {
+        return Optional.of(repository.save(solution));
     }
 
     @Override

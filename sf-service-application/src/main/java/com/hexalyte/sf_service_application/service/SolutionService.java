@@ -11,8 +11,8 @@ public interface SolutionService {
 
     List<Solution> getServices();
     Optional<Solution> getServiceById(Long id);
-    void addService(Solution solution);
-    void updateService(Solution solution);
+    Optional<Solution> addService(Solution solution);
+    Optional<Solution> updateService(Solution solution);
     void deleteService(Long id);
 
 }

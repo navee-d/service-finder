@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 
 @Embeddable
-record SolutionCategoriesKey(
+record SolutionCategoryKey(
         Long solutionId,
         Long categoryId
 ) implements Serializable {
@@ -13,9 +13,9 @@ record SolutionCategoriesKey(
 
 @Entity
 @Table(name = "m2m_solutioncategories")
-public record SolutionCategories(
+public record SolutionCategory(
         @EmbeddedId
-        SolutionCategoriesKey id,
+        SolutionCategoryKey id,
 
         @ManyToOne
         @MapsId("solutionId")

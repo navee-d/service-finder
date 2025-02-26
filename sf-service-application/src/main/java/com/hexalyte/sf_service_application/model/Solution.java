@@ -10,9 +10,9 @@ import java.time.LocalTime;
 @Table(name = "solution")
 public record Solution(
         @Id
-        @Column(name = "ServiceID")
+        @Column(name = "SolutionID")
         @GeneratedValue(strategy = GenerationType.IDENTITY)
-        Long serviceID,
+        Long solutionID,
 
         @Column(name = "UserID")
         Integer userID,

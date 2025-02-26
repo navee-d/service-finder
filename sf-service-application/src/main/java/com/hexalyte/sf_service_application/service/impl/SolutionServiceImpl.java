@@ -22,6 +22,7 @@ public class SolutionServiceImpl implements SolutionService {
         return repository.findAll();
     }
 
+
     @Override
     public Optional<Solution> getServiceById(Long id) {
         return repository.findById(id);

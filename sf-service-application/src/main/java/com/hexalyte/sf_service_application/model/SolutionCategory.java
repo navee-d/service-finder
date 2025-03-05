@@ -1,30 +1,32 @@
 package com.hexalyte.sf_service_application.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-
-import java.io.Serializable;
-
-@Embeddable
-record SolutionCategoryKey(
-        Long solutionId,
-        Long categoryId
-) implements Serializable {
-}
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "m2m_solutioncategories")
-public record SolutionCategory(
-        @EmbeddedId
-        SolutionCategoryKey id,
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class SolutionCategory {
+    @EmbeddedId
+    private SolutionCategoryKey id;
 
-        @ManyToOne
-        @MapsId("solutionId")
-        @JoinColumn(name = "SolutionID")
-        Solution solution,
+    @ManyToOne
+    @MapsId("solutionId")
+    @JoinColumn(name = "SolutionID")
+    @JsonIgnoreProperties("solutionCategories")
+    private Solution solution;
 
-        @ManyToOne
-        @MapsId("categoryId")
-        @JoinColumn(name = "CategoryID")
-        Category category
-) {
+    @ManyToOne
+    @MapsId("categoryId")
+    @JoinColumn(name = "CategoryID")
+    @JsonIgnoreProperties("solutionCategories")
+    private Category category;
+
 }

@@ -1,43 +1,71 @@
 package com.hexalyte.sf_service_application.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Positive;
+import lombok.Data;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "solution")
-public record Solution(
+@Data
+public class Solution{
+
         @Id
         @Column(name = "SolutionID")
         @GeneratedValue(strategy = GenerationType.IDENTITY)
-        Long solutionID,
+        private Long solutionId;
 
         @Column(name = "UserID")
-        Integer userID,
+        private Integer userId;
 
         @Column(name = "Name", length = 100, nullable = false)
-        String name,
+        @Length(max = 100, message = "Name cannot exceed 100 characters")
+        private String name;
 
         @Column(name = "Description", columnDefinition = "TEXT")
-        String description,
+        private String description;
 
         @Column(name = "Price", nullable = false, columnDefinition = "DECIMAL(10,2)")
-        Double price,
+        @NotNull(message = "Price cannot be null")
+        private Double price;
 
         @Column(name = "EstimatedTime")
-        Integer estimatedTime,
+        @Positive(message = "Estimated time must be a positive value")
+        private Integer estimatedTime;
 
         @Column(name = "ReminderTime", columnDefinition = "TIME")
-        LocalTime reminderTime,
+        private LocalTime reminderTime;
 
         @Column(name = "CreatedAt", columnDefinition = "TIMESTAMP")
         @ColumnDefault("CURRENT_TIMESTAMP")
-        LocalDateTime createdAt,
+        @PastOrPresent(message = "Created at date cannot be a future date")
+        private LocalDateTime createdAt;
 
         @Column(name = "UpdatedAt", columnDefinition = "TIMESTAMP")
         @ColumnDefault("CURRENT_TIMESTAMP")
-        LocalDateTime updatedAt
-) {
+        @PastOrPresent(message = "Updated at date cannot be a future date")
+        private LocalDateTime updatedAt;
+
+        @Column(name = "IsAvailable")
+        private Boolean isAvailable;
+
+        @Column(name = "IsActive")
+        private Boolean isActive;
+
+        @JsonIgnoreProperties("solution")
+        @OneToMany(mappedBy = "solution")
+        private List<SolutionCategory> solutionCategories = new ArrayList<>();
+
+        @Transient
+        private List<Long> categoryIds = new ArrayList<>();
+
 }

@@ -1,6 +1,7 @@
 package com.hexalyte.sf_service_application.controller;
 
 import com.hexalyte.sf_service_application.model.Category;
+import com.hexalyte.sf_service_application.model.SolutionCategory;
 import com.hexalyte.sf_service_application.service.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -8,10 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("category")
+@RequestMapping("categories")
 public class CategoryController {
     private final CategoryService service;
 
@@ -29,9 +29,14 @@ public class CategoryController {
         return ResponseEntity.of(service.getCategoryById(id));
     }
 
+    @GetMapping("category/service/{id}")
+    private ResponseEntity<List<SolutionCategory>> getCategoryServices(@PathVariable Long id){
+        return ResponseEntity.of(service.getCategoryServices(id));
+    }
+
     @PostMapping
-    public ResponseEntity<Optional<Category>> addCategory(@RequestBody @Valid Category category){
-        return new ResponseEntity<>(service.addCategory(category),HttpStatus.CREATED);
+    public ResponseEntity<Category> addCategory(@RequestBody @Valid Category category){
+        return ResponseEntity.of(service.addCategory(category));
     }
 
     @PutMapping("/{id}")

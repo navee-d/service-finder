@@ -9,10 +9,20 @@
         <outputRelativeToContentRoot value="true" />
         <module name="sf-service-application" />
       </profile>
+      <profile name="Annotation profile for sf_gallery_application" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
+        </processorPath>
+        <module name="sf-gallery-application" />
+      </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="sf-gallery-application" options="-parameters" />
       <module name="sf-service-application" options="-parameters" />
     </option>
   </component>

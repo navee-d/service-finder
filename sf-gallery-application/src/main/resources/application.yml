@@ -12,6 +12,9 @@ spring:
     url: jdbc:mysql://localhost:3306/sf_gallery_application_db?createDatabaseIfNotExist=true
   profiles:
     active: development
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
 server:
   error:
     include-message: ALWAYS

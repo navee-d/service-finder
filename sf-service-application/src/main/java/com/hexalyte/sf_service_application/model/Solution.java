@@ -7,6 +7,8 @@ import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDateTime;
@@ -45,13 +47,15 @@ public class Solution{
         @Column(name = "ReminderTime", columnDefinition = "TIME")
         private LocalTime reminderTime;
 
-        @Column(name = "CreatedAt", columnDefinition = "TIMESTAMP")
+        @Column(name = "CreatedAt", columnDefinition = "TIMESTAMP",updatable = false)
         @ColumnDefault("CURRENT_TIMESTAMP")
+        @CreationTimestamp
         @PastOrPresent(message = "Created at date cannot be a future date")
         private LocalDateTime createdAt;
 
         @Column(name = "UpdatedAt", columnDefinition = "TIMESTAMP")
         @ColumnDefault("CURRENT_TIMESTAMP")
+        @UpdateTimestamp
         @PastOrPresent(message = "Updated at date cannot be a future date")
         private LocalDateTime updatedAt;
 

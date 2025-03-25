@@ -6,8 +6,6 @@
     "price": 120.00,
     "estimatedTime": 10,
     "reminderTime": "00:09:30",
-    "createdAt": "2025-02-27T10:10:15",
-    "updatedAt": "2025-02-27T10:15:00",
     "isAvailable": true,
     "isActive": true
   },
@@ -18,8 +16,6 @@
     "price": 150.00,
     "estimatedTime": 30,
     "reminderTime": "00:05:10",
-    "createdAt": "2025-02-27T10:06:03",
-    "updatedAt": null,
     "isAvailable": true,
     "isActive": false
   },
@@ -30,8 +26,6 @@
     "price": 50.00,
     "estimatedTime": 5,
     "reminderTime": "00:03:00",
-    "createdAt": "2025-02-26T09:11:11",
-    "updatedAt": null,
     "isAvailable": false,
     "isActive": true
   }

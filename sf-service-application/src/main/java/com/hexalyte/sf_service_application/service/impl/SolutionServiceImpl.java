@@ -52,9 +52,6 @@ public class SolutionServiceImpl implements SolutionService {
     @Transactional
     public Optional<Solution> addService(Solution solution) {
 
-        if (solution.getCreatedAt().isAfter(solution.getUpdatedAt()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Created At date must be before the Updated At date");
-
         Solution savedSolution = solutionRepository.save(solution);
         List<SolutionCategory> solutionCategories = new ArrayList<>();
         solution.getCategoryIds().forEach(
@@ -90,9 +87,6 @@ public class SolutionServiceImpl implements SolutionService {
         if (!solutionRepository.existsById(id))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find service with such ID");
         solution.setSolutionId(id);
-
-        if (solution.getCreatedAt().isAfter(solution.getUpdatedAt()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Created At date must be before the Updated At date");
 
         Solution savedSolution = solutionRepository.save(solution);
         solutionCategoryRepository.deleteAllBySolution_SolutionId(savedSolution.getSolutionId());

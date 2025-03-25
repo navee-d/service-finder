@@ -1,0 +1,20 @@
+spring:
+  jpa:
+    properties:
+      hibernate:
+        column_ordering_strategy: legacy
+    hibernate:
+      ddl-auto: 'create'
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/sf_gallery_application_db?createDatabaseIfNotExist=true
+  profiles:
+    active: development
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+server:
+  error:
+    include-message: ALWAYS

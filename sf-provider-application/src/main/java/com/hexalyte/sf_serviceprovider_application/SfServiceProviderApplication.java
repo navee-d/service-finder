@@ -4,10 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SfServiceproviderApplication {
-
+public class SfServiceProviderApplication {
     public static void main(String[] args) {
-        SpringApplication.run(SfServiceproviderApplication.class, args);
+        SpringApplication.run(SfServiceProviderApplication.class, args);
     }
-
 }

@@ -2,7 +2,6 @@ package com.hexalyte.sf_serviceprovider_application.controller;
 
 import com.hexalyte.sf_serviceprovider_application.model.Provider;
 import com.hexalyte.sf_serviceprovider_application.repository.ProviderRepository;
-import com.hexalyte.sf_serviceprovider_application.services.ProviderService;
 import com.hexalyte.sf_serviceprovider_application.services.impl.ProviderServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

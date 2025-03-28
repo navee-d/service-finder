@@ -28,6 +28,9 @@ public class Gallery {
     @Length(max = 255,message = "Image URL cannot exceed 255 characters")
     private String imageUrl;
 
+    @Column(name = "ContentType",length = 30)
+    private String contentType;
+
     @Column(name = "Description", columnDefinition = "TEXT")
     private String description;
 

@@ -18,3 +18,10 @@ spring:
 server:
   error:
     include-message: ALWAYS
+object-storage:
+  bucket-policy-config-dir: sf-gallery-application/src/main/resources/bucket_policy_config
+  image-part-size: 5 * 1024 * 1024L
+  endpoint: http://127.0.0.1:9000
+  buckets:
+     images: "${object-storage.bucket-policy-config-dir}/imagebucketpolicy.json"
+     documents: "${object-storage.bucket-policy-config-dir}/documentsbucketpolicy.json"

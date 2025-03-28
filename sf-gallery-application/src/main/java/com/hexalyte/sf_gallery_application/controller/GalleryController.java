@@ -32,8 +32,8 @@ public class GalleryController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Optional<Gallery>> addImage(Gallery gallery, @RequestParam("image") MultipartFile image) {
-        return new ResponseEntity<>(service.addGallery(gallery, image), HttpStatus.CREATED);
+    public ResponseEntity<Optional<List<Gallery>>> addImage(Gallery gallery, @RequestParam("images") MultipartFile[] images) {
+        return new ResponseEntity<>(service.addGallery(gallery, images), HttpStatus.CREATED);
     }
 
     @PutMapping(path = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

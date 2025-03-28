@@ -11,7 +11,7 @@ public interface GalleryService {
 
     Optional<Gallery> getGalleryById(Long id);
 
-    Optional<Gallery> addGallery(Gallery gallery, MultipartFile image);
+    Optional<List<Gallery>> addGallery(Gallery gallery, MultipartFile[] image);
 
     Optional<Gallery> updateGallery(Gallery gallery, MultipartFile image, Long id);
 

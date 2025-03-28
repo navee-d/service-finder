@@ -1,7 +1,10 @@
 package com.hexalyte.sf_gallery_application.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.data.annotation.CreatedDate;
@@ -13,7 +16,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "gallery")
 @Data
+@Builder
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
+@AllArgsConstructor
 public class Gallery {
 
     @Id

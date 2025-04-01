@@ -117,7 +117,7 @@ public class GalleryServiceImpl implements GalleryService {
 
         if (!image.isEmpty()) {
             try {
-                String objectName = FilenameUtils.getName(new URI(galleryRepository.getReferenceById(id).getImageUrl()).getPath());
+                String objectName = galleryRepository.getReferenceById(id).getImageUrl();
                 minioClient.putObject(
                         PutObjectArgs.builder()
                                 .bucket("images")
@@ -144,8 +144,6 @@ public class GalleryServiceImpl implements GalleryService {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "HTTP server error: " + e.getMessage());
             } catch (XmlParserException e) {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "XML server error: " + e.getMessage());
-            } catch (URISyntaxException e) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "URI cannot be parsed: " + e.getMessage());
             }
         }
 

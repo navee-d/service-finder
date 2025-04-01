@@ -147,9 +147,12 @@ public class GalleryServiceImpl implements GalleryService {
 
 
     @Override
-    public void deleteGallery(Long id) {
-        if (!galleryRepository.existsById(id))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Gallery with such ID is not found");
+    public void deleteImage(Long serviceProviderId,Long id) {
+        if (!galleryRepository.existsByServiceProviderId(serviceProviderId))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Gallery with such service provider ID is not found");
+        else if (!galleryRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image with such ID under this service provider is not found");
+        }
 
         try {
             String objectName = galleryRepository.getReferenceById(id).getImageUrl();

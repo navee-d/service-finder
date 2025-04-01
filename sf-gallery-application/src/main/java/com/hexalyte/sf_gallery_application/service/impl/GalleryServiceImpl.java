@@ -58,15 +58,16 @@ public class GalleryServiceImpl implements GalleryService {
 
         List<Gallery> imageList = new ArrayList<>();
 
+        if (images == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Images are not attached");
+
         for (MultipartFile image : images) {
-            if (image.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image is empty");
-            } else if (!(image.getContentType().equals("image/jpeg") || image.getContentType().equals("image/png"))) {
+            if (!(image.getContentType().equals("image/jpeg") || image.getContentType().equals("image/png"))) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image file is not jpeg/png");
             }
 
             try {
-                String objectName = "image" + new Date().getTime();
+                String objectName = gallery.getServiceProviderId() + "/image" + new Date().getTime();
                 minioClient.putObject(
                         PutObjectArgs.builder()
                                 .bucket("images")
@@ -79,7 +80,7 @@ public class GalleryServiceImpl implements GalleryService {
                 Gallery galleryItem = Gallery.builder()
                         .serviceProviderId(gallery.getServiceProviderId())
                         .description(gallery.getDescription())
-                        .imageUrl("images/" + objectName)
+                        .imageUrl(objectName)
                         .contentType(image.getContentType())
                         .build();
                 imageList.add(galleryItem);

@@ -3,9 +3,11 @@ package com.hexalyte.sf_gallery_application.service.impl;
 import com.hexalyte.sf_gallery_application.model.Gallery;
 import com.hexalyte.sf_gallery_application.repository.GalleryRepository;
 import com.hexalyte.sf_gallery_application.service.GalleryService;
-import io.minio.*;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
+import io.minio.RemoveObjectsArgs;
 import io.minio.errors.*;
-import io.minio.messages.DeleteError;
 import io.minio.messages.DeleteObject;
 import jakarta.transaction.Transactional;
 import org.apache.commons.io.FilenameUtils;
@@ -53,11 +55,10 @@ public class GalleryServiceImpl implements GalleryService {
 
         List<Gallery> imageList = new ArrayList<>();
 
-        if (images == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Images are not attached");
-
         for (MultipartFile image : images) {
-            if (!(image.getContentType().equals("image/jpeg") || image.getContentType().equals("image/png"))) {
+            if (image.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Images are not attached");
+            } else if (!(image.getContentType().equals("image/jpeg") || image.getContentType().equals("image/png"))) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image file is not jpeg/png");
             }
 

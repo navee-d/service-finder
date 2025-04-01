@@ -3,10 +3,11 @@ package com.hexalyte.sf_gallery_application.service.impl;
 import com.hexalyte.sf_gallery_application.model.Gallery;
 import com.hexalyte.sf_gallery_application.repository.GalleryRepository;
 import com.hexalyte.sf_gallery_application.service.GalleryService;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.RemoveObjectArgs;
+import io.minio.*;
 import io.minio.errors.*;
+import io.minio.messages.DeleteError;
+import io.minio.messages.DeleteObject;
+import jakarta.transaction.Transactional;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -19,10 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class GalleryServiceImpl implements GalleryService {
@@ -187,5 +185,50 @@ public class GalleryServiceImpl implements GalleryService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "XML server error: " + e.getMessage());
         }
         galleryRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void deleteGalleryById(Long serviceProviderId) {
+        if (!galleryRepository.existsByServiceProviderId(serviceProviderId))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Gallery with such service provider ID is not found");
+
+        LinkedList<DeleteObject> deleteObjects = new LinkedList<>();
+        galleryRepository.findAllByServiceProviderId(serviceProviderId).forEach(gallery -> {
+            deleteObjects.add(new DeleteObject(gallery.getImageUrl()));
+        });
+
+        minioClient.removeObjects(
+                RemoveObjectsArgs.builder()
+                        .bucket("images")
+                        .objects(deleteObjects)
+                        .build()
+        ).forEach(
+                deleteErrorResult -> {
+                    try {
+                        deleteErrorResult.get();
+                    } catch (ErrorResponseException e) {
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "S3 service error: " + e.getMessage());
+                    } catch (InsufficientDataException e) {
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Insufficient data available in the image object inputstream");
+                    } catch (InternalException e) {
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal library error: " + e.getMessage());
+                    } catch (InvalidKeyException e) {
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Missing HMAC SHA-256 library");
+                    } catch (InvalidResponseException e) {
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "S3 service returned invalid/no error response: " + e.getMessage());
+                    } catch (IOException e) {
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "I/O error on S3 operation: " + e.getMessage());
+                    } catch (NoSuchAlgorithmException e) {
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Missing MD5 or SHA-256 digest library");
+                    } catch (ServerException e) {
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "HTTP server error: " + e.getMessage());
+                    } catch (XmlParserException e) {
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "XML server error: " + e.getMessage());
+                    }
+                }
+        );
+
+        galleryRepository.deleteAllByServiceProviderId(serviceProviderId);
     }
 }

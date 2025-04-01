@@ -41,9 +41,15 @@ public class GalleryController {
         return ResponseEntity.of(service.updateGallery(gallery, image, id));
     }
 
-    @DeleteMapping("/{id}")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Gallery deleted successfully")
+    @DeleteMapping("/{serviceProviderId}/{id}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Image deleted successfully")
     public void deleteGallery(@PathVariable Long id) {
         service.deleteGallery(id);
+    }
+
+    @DeleteMapping("/{serviceProviderId}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Gallery deleted successfully")
+    public void deleteGalleryByServiceProviderId(@PathVariable Long serviceProviderId) {
+        service.deleteGalleryById(serviceProviderId);
     }
 }

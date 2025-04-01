@@ -16,4 +16,6 @@ public interface GalleryService {
     Optional<Gallery> updateGallery(Gallery gallery, MultipartFile image, Long id);
 
     void deleteGallery(Long id);
+
+    void deleteGalleryById(Long serviceProviderId);
 }

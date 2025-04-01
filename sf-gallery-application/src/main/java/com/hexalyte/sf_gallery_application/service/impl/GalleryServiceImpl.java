@@ -33,9 +33,6 @@ public class GalleryServiceImpl implements GalleryService {
     @Value("#{${object-storage.image-part-size}}")
     private Long imagePartSize;
 
-    @Value("${object-storage.endpoint}")
-    private String endpoint;
-
     public GalleryServiceImpl(GalleryRepository galleryRepository, MinioClient minioClient) {
         this.galleryRepository = galleryRepository;
         this.minioClient = minioClient;
@@ -163,7 +160,7 @@ public class GalleryServiceImpl implements GalleryService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Gallery with such ID is not found");
 
         try {
-            String objectName = FilenameUtils.getName(new URI(endpoint + galleryRepository.getReferenceById(id).getImageUrl()).getPath());
+            String objectName = galleryRepository.getReferenceById(id).getImageUrl();
             minioClient.removeObject(
                     RemoveObjectArgs.builder()
                             .bucket("images")
@@ -188,8 +185,6 @@ public class GalleryServiceImpl implements GalleryService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "HTTP server error: " + e.getMessage());
         } catch (XmlParserException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "XML server error: " + e.getMessage());
-        } catch (URISyntaxException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "URI cannot be parsed: " + e.getMessage());
         }
         galleryRepository.deleteById(id);
     }

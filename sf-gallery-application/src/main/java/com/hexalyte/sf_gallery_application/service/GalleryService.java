@@ -17,5 +17,5 @@ public interface GalleryService {
 
     void deleteGallery(Long id);
 
-    void deleteGalleryById(Long serviceProviderId);
+    void deleteGalleryByServiceProviderId(Long serviceProviderId);
 }

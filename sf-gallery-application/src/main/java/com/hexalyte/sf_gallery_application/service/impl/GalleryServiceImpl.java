@@ -188,7 +188,7 @@ public class GalleryServiceImpl implements GalleryService {
 
     @Override
     @Transactional
-    public void deleteGalleryById(Long serviceProviderId) {
+    public void deleteGalleryByServiceProviderId(Long serviceProviderId) {
         if (!galleryRepository.existsByServiceProviderId(serviceProviderId))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Gallery with such service provider ID is not found");
 

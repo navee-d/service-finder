@@ -50,6 +50,6 @@ public class GalleryController {
     @DeleteMapping("/{serviceProviderId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Gallery deleted successfully")
     public void deleteGalleryByServiceProviderId(@PathVariable Long serviceProviderId) {
-        service.deleteGalleryById(serviceProviderId);
+        service.deleteGalleryByServiceProviderId(serviceProviderId);
     }
 }

@@ -31,6 +31,11 @@ public class GalleryController {
         return ResponseEntity.of(service.getGalleryById(id));
     }
 
+    @GetMapping("download/{id}")
+    public void downloadImage(@PathVariable Long id){
+        service.downloadImage(id);
+    }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Optional<List<Gallery>>> addImage(Gallery gallery, @RequestParam("images") MultipartFile[] images) {
         return new ResponseEntity<>(service.addGallery(gallery, images), HttpStatus.CREATED);

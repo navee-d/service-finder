@@ -3,23 +3,18 @@ package com.hexalyte.sf_gallery_application.service.impl;
 import com.hexalyte.sf_gallery_application.model.Gallery;
 import com.hexalyte.sf_gallery_application.repository.GalleryRepository;
 import com.hexalyte.sf_gallery_application.service.GalleryService;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.RemoveObjectArgs;
-import io.minio.RemoveObjectsArgs;
+import io.minio.*;
 import io.minio.errors.*;
 import io.minio.messages.DeleteObject;
 import jakarta.transaction.Transactional;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -229,5 +224,43 @@ public class GalleryServiceImpl implements GalleryService {
         );
 
         galleryRepository.deleteAllByServiceProviderId(serviceProviderId);
+    }
+
+    @Override
+    public void downloadImage(Long id) {
+        if (!galleryRepository.existsById(id))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image with such ID is not found");
+
+        try {
+            Gallery image = galleryRepository.getReferenceById(id);
+            String home = System.getProperty("user.home");
+            String filename = home + File.separator + "Downloads" + File.separator + "download" + new Date().getTime() + "." + image.getContentType().substring(6);
+            minioClient.downloadObject(
+                    DownloadObjectArgs.builder()
+                            .bucket("images")
+                            .object(image.getImageUrl())
+                            .filename(filename)
+                            .build()
+            );
+        } catch (ErrorResponseException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "S3 service error: " + e.getMessage());
+        } catch (InsufficientDataException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Insufficient data available in the image object inputstream");
+        } catch (InternalException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal library error: " + e.getMessage());
+        } catch (InvalidKeyException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Missing HMAC SHA-256 library");
+        } catch (InvalidResponseException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "S3 service returned invalid/no error response: " + e.getMessage());
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "I/O error on S3 operation: " + e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Missing MD5 or SHA-256 digest library");
+        } catch (ServerException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "HTTP server error: " + e.getMessage());
+        } catch (XmlParserException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "XML server error: " + e.getMessage());
+        }
+
     }
 }

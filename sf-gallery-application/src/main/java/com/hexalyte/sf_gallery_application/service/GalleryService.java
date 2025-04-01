@@ -18,4 +18,6 @@ public interface GalleryService {
     void deleteGallery(Long id);
 
     void deleteGalleryByServiceProviderId(Long serviceProviderId);
+
+    void downloadImage(Long id);
 }

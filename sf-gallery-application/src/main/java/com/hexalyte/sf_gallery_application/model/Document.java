@@ -20,27 +20,27 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Documents {
+public class Document {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "DocumentID")
-    private Long galleryId;
+    private Long documentId;
 
     @Column(name = "ServiceProviderID")
     private Long serviceProviderId;
 
-    @Column(name = "DocumentURL", nullable = false,updatable = false)
-    @Length(max = 255,message = "Image URL cannot exceed 255 characters")
-    private String imageUrl;
+    @Column(name = "DocumentURL", nullable = false)
+    @Length(max = 255, message = "Document URL cannot exceed 255 characters")
+    private String documentUrl;
 
-    @Column(name = "ContentType",length = 30)
+    @Column(name = "ContentType", length = 70)
     private String contentType;
 
     @Column(name = "Description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "CreatedAt", columnDefinition = "TIMESTAMP",updatable = false)
+    @Column(name = "CreatedAt", columnDefinition = "TIMESTAMP", updatable = false)
     @ColumnDefault("CURRENT_TIMESTAMP")
     @CreatedDate
     private LocalDateTime createdAt;

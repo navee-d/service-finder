@@ -31,6 +31,11 @@ public class GalleryController {
         return ResponseEntity.of(service.getGalleryById(id));
     }
 
+    @GetMapping("download/{id}")
+    public void downloadImage(@PathVariable Long id){
+        service.downloadImage(id);
+    }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Optional<List<Gallery>>> addImage(Gallery gallery, @RequestParam("images") MultipartFile[] images) {
         return new ResponseEntity<>(service.addGallery(gallery, images), HttpStatus.CREATED);
@@ -41,9 +46,15 @@ public class GalleryController {
         return ResponseEntity.of(service.updateGallery(gallery, image, id));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{serviceProviderId}/{id}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Image deleted successfully")
+    public void deleteImage(@PathVariable Long serviceProviderId,@PathVariable Long id) {
+        service.deleteImage(serviceProviderId,id);
+    }
+
+    @DeleteMapping("/{serviceProviderId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Gallery deleted successfully")
-    public void deleteGallery(@PathVariable Long id) {
-        service.deleteGallery(id);
+    public void deleteGalleryByServiceProviderId(@PathVariable Long serviceProviderId) {
+        service.deleteGalleryByServiceProviderId(serviceProviderId);
     }
 }

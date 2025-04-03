@@ -30,7 +30,7 @@ public class Gallery {
     @Column(name = "ServiceProviderID")
     private Long serviceProviderId;
 
-    @Column(name = "ImageURL", nullable = false,updatable = false)
+    @Column(name = "ImageURL", nullable = false)
     @Length(max = 255,message = "Image URL cannot exceed 255 characters")
     private String imageUrl;
 

@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 @Embeddable
-@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class SolutionCategoryKey implements Serializable {
-    private Long solutionId;
-    private Long categoryId;
+@Data
+public class SubCategorySolutionKey implements Serializable {
+    private Integer subCategoryId;
+    private Integer solutionId;
 }

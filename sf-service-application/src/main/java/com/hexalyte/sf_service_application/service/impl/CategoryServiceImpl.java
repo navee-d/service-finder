@@ -1,13 +1,13 @@
 package com.hexalyte.sf_service_application.service.impl;
 
 import com.hexalyte.sf_service_application.model.Category;
-import com.hexalyte.sf_service_application.model.SolutionCategory;
+import com.hexalyte.sf_service_application.model.CategorySolution;
 import com.hexalyte.sf_service_application.repository.CategoryRepository;
-import com.hexalyte.sf_service_application.repository.SolutionCategoryRepository;
+import com.hexalyte.sf_service_application.repository.CategorySolutionRepository;
+import com.hexalyte.sf_service_application.repository.SubCategoryRepository;
 import com.hexalyte.sf_service_application.service.CategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -17,62 +17,89 @@ import java.util.Optional;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final SolutionCategoryRepository solutionCategoryRepository;
+    private final SubCategoryRepository subCategoryRepository;
+    private final CategorySolutionRepository categorySolutionRepository;
 
-    public CategoryServiceImpl(CategoryRepository categoryRepository, SolutionCategoryRepository solutionCategoryRepository) {
+    public CategoryServiceImpl(CategoryRepository categoryRepository, SubCategoryRepository subCategoryRepository,
+                               CategorySolutionRepository categorySolutionRepository) {
         this.categoryRepository = categoryRepository;
-        this.solutionCategoryRepository = solutionCategoryRepository;
+        this.subCategoryRepository = subCategoryRepository;
+        this.categorySolutionRepository = categorySolutionRepository;
     }
 
     @Override
     public List<Category> getCategories() {
-        return categoryRepository.findAll();
+        return categoryRepository.findAllByIsActive(true);
     }
 
     @Override
-    public Optional<Category> getCategoryById(Long id) {
-        Optional<Category> category = categoryRepository.findById(id);
+    public Optional<Category> getCategoryById(Integer id) {
+        Optional<Category> category = categoryRepository.findByCategoryIdAndIsActive(id, true);
         if (category.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find category with such ID");
         return category;
     }
 
     @Override
-    public Optional<List<SolutionCategory>> getCategoryServices(Long id) {
-        return solutionCategoryRepository.findByCategory_CategoryId(id);
+    public List<CategorySolution> getCategoryServices(Integer id) {
+        List<CategorySolution> categorySolutions = categorySolutionRepository.findByCategory_CategoryId(id);
+        if (categorySolutions.isEmpty()) return null;
+        return categorySolutions;
     }
 
     @Override
     public Optional<Category> addCategory(Category category) {
 
-        category.setDescription(
-                category.getDescription().isBlank() ? null : category.getDescription()
-        );
+        if (category.getDescription().isBlank())
+            category.setDescription(null);
+
+        category.setIsActive(true);
 
         return Optional.of(categoryRepository.save(category));
     }
 
     @Override
-    public Optional<Category> updateCategory(Long id,Category category) {
+    public Optional<Category> updateCategory(Integer id, Category category) {
 
-        category.setDescription(
-                category.getDescription().isBlank() ? null : category.getDescription()
+        if (category.getDescription().isBlank())
+            category.setDescription(null);
+
+        Category updatingCategory = categoryRepository.findByCategoryIdAndIsActive(id, true).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category with such ID cannot be found.")
         );
 
-        if (!categoryRepository.existsById(id))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find category with such ID");
-        category.setCategoryId(id);
-        return Optional.of(categoryRepository.save(category));
+        if (categoryRepository.getReferenceById(id).getName().equals("None"))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not a category");
+
+        updatingCategory.setName(category.getName());
+        updatingCategory.setDescription(category.getDescription());
+
+        return Optional.of(categoryRepository.save(updatingCategory));
     }
 
     @Override
-    @Transactional
-    public void deleteCategory(Long id) {
+    public void deleteCategory(Integer id) {
 
-        if (!categoryRepository.existsById(id))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find category with such ID");
-        solutionCategoryRepository.deleteAllByCategory_CategoryId(id);
-        categoryRepository.deleteById(id);
+        Category category = categoryRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category with such ID cannot be found.")
+        );
+
+        if (categoryRepository.getReferenceById(id).getName().equals("None"))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not a category");
+
+        category.setIsActive(false);
+
+        Category none = categoryRepository.findByName("None").orElseGet(
+                () -> categoryRepository.save(Category.builder().name("None").build())
+        );
+
+        category.getSolutions().forEach(
+                solution -> solution.setCategory(none)
+        );
+
+        subCategoryRepository.deleteAll(category.getSubCategories());
+
+        categorySolutionRepository.deleteAll(category.getCategorySolutions());
 
     }
 

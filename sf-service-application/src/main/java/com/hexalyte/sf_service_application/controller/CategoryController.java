@@ -1,7 +1,7 @@
 package com.hexalyte.sf_service_application.controller;
 
 import com.hexalyte.sf_service_application.model.Category;
-import com.hexalyte.sf_service_application.model.SolutionCategory;
+import com.hexalyte.sf_service_application.model.CategorySolution;
 import com.hexalyte.sf_service_application.service.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -25,13 +25,13 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable Long id){
+    public ResponseEntity<Category> getCategoryById(@PathVariable Integer id){
         return ResponseEntity.of(service.getCategoryById(id));
     }
 
-    @GetMapping("category/service/{id}")
-    private ResponseEntity<List<SolutionCategory>> getCategoryServices(@PathVariable Long id){
-        return ResponseEntity.of(service.getCategoryServices(id));
+    @GetMapping("category/services/{id}")
+    private ResponseEntity<List<CategorySolution>> getCategoryServices(@PathVariable Integer id){
+        return ResponseEntity.ofNullable(service.getCategoryServices(id));
     }
 
     @PostMapping
@@ -40,13 +40,13 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Category> updateCategory(@PathVariable Long id,@RequestBody @Valid Category category){
+    public ResponseEntity<Category> updateCategory(@PathVariable Integer id,@RequestBody @Valid Category category){
         return ResponseEntity.of(service.updateCategory(id,category));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT,reason = "Category successfully deleted")
-    public void deleteCategory(@PathVariable Long id){
+    public void deleteCategory(@PathVariable Integer id){
         service.deleteCategory(id);
     }
 

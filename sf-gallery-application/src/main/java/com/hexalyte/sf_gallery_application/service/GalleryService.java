@@ -11,9 +11,13 @@ public interface GalleryService {
 
     Optional<Gallery> getGalleryById(Long id);
 
-    Optional<Gallery> addGallery(Gallery gallery, MultipartFile image);
+    Optional<List<Gallery>> addGallery(Gallery gallery, MultipartFile[] image);
 
     Optional<Gallery> updateGallery(Gallery gallery, MultipartFile image, Long id);
 
-    void deleteGallery(Long id);
+    void deleteImage(Long serviceProviderId, Long id);
+
+    void deleteGalleryByServiceProviderId(Long serviceProviderId);
+
+    void downloadImage(Long id);
 }

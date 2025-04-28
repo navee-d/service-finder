@@ -1,8 +1,8 @@
 package com.hexalyte.sf_gallery_application.service.impl;
 
-import com.hexalyte.sf_gallery_application.model.Gallery;
-import com.hexalyte.sf_gallery_application.repository.GalleryRepository;
-import com.hexalyte.sf_gallery_application.service.GalleryService;
+import com.hexalyte.sf_gallery_application.model.Document;
+import com.hexalyte.sf_gallery_application.repository.DocumentRepository;
+import com.hexalyte.sf_gallery_application.service.DocumentService;
 import io.minio.*;
 import io.minio.errors.*;
 import io.minio.messages.DeleteObject;
@@ -20,61 +20,65 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 @Service
-public class GalleryServiceImpl implements GalleryService {
+public class DocumentServiceImpl implements DocumentService {
 
-    private final GalleryRepository galleryRepository;
+    private final DocumentRepository documentRepository;
     private final MinioClient minioClient;
+    private final Map<String,String> docContentTypes = new HashMap<>();
 
-    @Value("#{${object-storage.image-part-size}}")
-    private Long imagePartSize;
+    @Value("#{${object-storage.doc-part-size}}")
+    private Long docPartSize;
 
-    public GalleryServiceImpl(GalleryRepository galleryRepository, MinioClient minioClient) {
-        this.galleryRepository = galleryRepository;
+    public DocumentServiceImpl(DocumentRepository documentRepository, MinioClient minioClient) {
+        this.documentRepository = documentRepository;
         this.minioClient = minioClient;
+        docContentTypes.put("application/pdf",".pdf");
+        docContentTypes.put("application/vnd.ms-excel",".xls");
+        docContentTypes.put("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",".xlsx");
     }
 
     @Override
-    public List<Gallery> getGalleries() {
-        return galleryRepository.findAll();
+    public List<Document> getDocuments() {
+        return documentRepository.findAll();
     }
 
     @Override
-    public Optional<Gallery> getGalleryById(Long id) {
-        if (!galleryRepository.existsById(id))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Gallery not found");
-        return galleryRepository.findById(id);
+    public Optional<Document> getDocumentById(Long id) {
+        if (!documentRepository.existsById(id))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found");
+        return documentRepository.findById(id);
     }
 
     @Override
-    public Optional<List<Gallery>> addGallery(Gallery gallery, MultipartFile[] images) {
+    public Optional<List<Document>> addDocuments(Document document, MultipartFile[] files) {
 
-        List<Gallery> imageList = new ArrayList<>();
+        List<Document> fileList = new ArrayList<>();
 
-        for (MultipartFile image : images) {
-            if (image.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Images are not attached");
-            } else if (!(image.getContentType().equals("image/jpeg") || image.getContentType().equals("image/png"))) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image file is not jpeg/png");
+        for (MultipartFile file : files) {
+            if (file.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "documents are not attached");
+            } else if (!docContentTypes.containsKey(file.getContentType())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Document file is not pdf or spreadsheet");
             }
 
             try {
-                String objectName = gallery.getServiceProviderId() + "/image" + new Date().getTime();
+                String objectName = document.getServiceProviderId() + "/file" + new Date().getTime();
                 minioClient.putObject(
                         PutObjectArgs.builder()
-                                .bucket("images")
+                                .bucket("documents")
                                 .object(objectName)
-                                .stream(image.getInputStream(), -1, imagePartSize)
-                                .contentType(image.getContentType())
+                                .stream(file.getInputStream(), -1, docPartSize)
+                                .contentType(file.getContentType())
                                 .build()
                 );
 
-                Gallery galleryItem = Gallery.builder()
-                        .serviceProviderId(gallery.getServiceProviderId())
-                        .description(gallery.getDescription())
-                        .imageUrl(objectName)
-                        .contentType(image.getContentType())
+                Document documentItem = Document.builder()
+                        .serviceProviderId(document.getServiceProviderId())
+                        .description(document.getDescription())
+                        .documentUrl(objectName)
+                        .contentType(file.getContentType())
                         .build();
-                imageList.add(galleryItem);
+                fileList.add(documentItem);
 
             } catch (ErrorResponseException e) {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "S3 service error: " + e.getMessage());
@@ -97,28 +101,31 @@ public class GalleryServiceImpl implements GalleryService {
             }
 
         }
-        return Optional.of(galleryRepository.saveAll(imageList));
+        return Optional.of(documentRepository.saveAll(fileList));
     }
 
 
     @Override
-    public Optional<Gallery> updateGallery(Gallery gallery, MultipartFile image, Long id) {
-        if (!galleryRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Gallery with such ID is not found");
-        } else if (!image.isEmpty() && !(image.getContentType().equals("image/jpeg") || image.getContentType().equals("image/png"))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image file is not jpeg/png");
+    public Optional<Document> updateDocument(Document document, MultipartFile file, Long id) {
+        if (!documentRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Document with such ID is not found");
+        } else if (!docContentTypes.containsKey(file.getContentType())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Document file is not pdf or spreadsheet");
         }
-        gallery.setGalleryId(id);
 
-        if (!image.isEmpty()) {
+        Document doc = documentRepository.getReferenceById(id);
+        doc.setDescription(document.getDescription());
+        doc.setContentType(file.getContentType());
+
+        if (!file.isEmpty()) {
             try {
-                String objectName = galleryRepository.getReferenceById(id).getImageUrl();
+                String objectName = doc.getDocumentUrl();
                 minioClient.putObject(
                         PutObjectArgs.builder()
-                                .bucket("images")
+                                .bucket("documents")
                                 .object(objectName)
-                                .stream(image.getInputStream(), -1, imagePartSize)
-                                .contentType(image.getContentType())
+                                .stream(file.getInputStream(), -1, docPartSize)
+                                .contentType(file.getContentType())
                                 .build()
                 );
             } catch (ErrorResponseException e) {
@@ -142,30 +149,30 @@ public class GalleryServiceImpl implements GalleryService {
             }
         }
 
-        return Optional.of(galleryRepository.save(gallery));
+        return Optional.of(documentRepository.save(doc));
     }
 
 
     @Override
-    public void deleteImage(Long serviceProviderId,Long id) {
-        if (!galleryRepository.existsByServiceProviderId(serviceProviderId))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Gallery with such service provider ID is not found");
-        else if (!galleryRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image with such ID under this service provider is not found");
+    public void deleteDocument(Long serviceProviderId, Long id) {
+        if (!documentRepository.existsByServiceProviderId(serviceProviderId))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Document with such service provider ID is not found");
+        else if (!documentRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Document with such ID under this service provider is not found");
         }
 
         try {
-            String objectName = galleryRepository.getReferenceById(id).getImageUrl();
+            String objectName = documentRepository.getReferenceById(id).getDocumentUrl();
             minioClient.removeObject(
                     RemoveObjectArgs.builder()
-                            .bucket("images")
+                            .bucket("documents")
                             .object(objectName)
                             .build()
             );
         } catch (ErrorResponseException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "S3 service error: " + e.getMessage());
         } catch (InsufficientDataException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Insufficient data available in the image object inputstream");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Insufficient data available in the Document object inputstream");
         } catch (InternalException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal library error: " + e.getMessage());
         } catch (InvalidKeyException e) {
@@ -181,23 +188,23 @@ public class GalleryServiceImpl implements GalleryService {
         } catch (XmlParserException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "XML server error: " + e.getMessage());
         }
-        galleryRepository.deleteById(id);
+        documentRepository.deleteById(id);
     }
 
     @Override
     @Transactional
-    public void deleteGalleryByServiceProviderId(Long serviceProviderId) {
-        if (!galleryRepository.existsByServiceProviderId(serviceProviderId))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Gallery with such service provider ID is not found");
+    public void deleteDocumentsByServiceProviderId(Long serviceProviderId) {
+        if (!documentRepository.existsByServiceProviderId(serviceProviderId))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Documents with such service provider ID cannot found");
 
         LinkedList<DeleteObject> deleteObjects = new LinkedList<>();
-        galleryRepository.findAllByServiceProviderId(serviceProviderId).forEach(gallery -> {
-            deleteObjects.add(new DeleteObject(gallery.getImageUrl()));
+        documentRepository.findAllByServiceProviderId(serviceProviderId).forEach(document -> {
+            deleteObjects.add(new DeleteObject(document.getDocumentUrl()));
         });
 
         minioClient.removeObjects(
                 RemoveObjectsArgs.builder()
-                        .bucket("images")
+                        .bucket("documents")
                         .objects(deleteObjects)
                         .build()
         ).forEach(
@@ -207,7 +214,7 @@ public class GalleryServiceImpl implements GalleryService {
                     } catch (ErrorResponseException e) {
                         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "S3 service error: " + e.getMessage());
                     } catch (InsufficientDataException e) {
-                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Insufficient data available in the image object inputstream");
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Insufficient data available in the document object inputstream");
                     } catch (InternalException e) {
                         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal library error: " + e.getMessage());
                     } catch (InvalidKeyException e) {
@@ -226,29 +233,29 @@ public class GalleryServiceImpl implements GalleryService {
                 }
         );
 
-        galleryRepository.deleteAllByServiceProviderId(serviceProviderId);
+        documentRepository.deleteAllByServiceProviderId(serviceProviderId);
     }
 
     @Override
-    public void downloadImage(Long id) {
-        if (!galleryRepository.existsById(id))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image with such ID is not found");
+    public void downloadDocument(Long id) {
+        if (!documentRepository.existsById(id))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Document with such ID is not found");
 
         try {
-            Gallery image = galleryRepository.getReferenceById(id);
+            Document document = documentRepository.getReferenceById(id);
             String home = System.getProperty("user.home");
-            String filename = home + File.separator + "Downloads" + File.separator + "download" + new Date().getTime() + "." + image.getContentType().substring(6);
+            String filename = home + File.separator + "Downloads" + File.separator + "download" + new Date().getTime() + docContentTypes.get(document.getContentType());
             minioClient.downloadObject(
                     DownloadObjectArgs.builder()
-                            .bucket("images")
-                            .object(image.getImageUrl())
+                            .bucket("documents")
+                            .object(document.getDocumentUrl())
                             .filename(filename)
                             .build()
             );
         } catch (ErrorResponseException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "S3 service error: " + e.getMessage());
         } catch (InsufficientDataException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Insufficient data available in the image object inputstream");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Insufficient data available in the document object inputstream");
         } catch (InternalException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal library error: " + e.getMessage());
         } catch (InvalidKeyException e) {

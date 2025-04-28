@@ -108,11 +108,13 @@ public class GalleryServiceImpl implements GalleryService {
         } else if (!image.isEmpty() && !(image.getContentType().equals("image/jpeg") || image.getContentType().equals("image/png"))) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image file is not jpeg/png");
         }
-        gallery.setGalleryId(id);
+        Gallery updatingImage = galleryRepository.getReferenceById(id);
+        updatingImage.setDescription(gallery.getDescription());
+        updatingImage.setContentType(image.getContentType());
 
         if (!image.isEmpty()) {
             try {
-                String objectName = galleryRepository.getReferenceById(id).getImageUrl();
+                String objectName = updatingImage.getImageUrl();
                 minioClient.putObject(
                         PutObjectArgs.builder()
                                 .bucket("images")
@@ -142,7 +144,7 @@ public class GalleryServiceImpl implements GalleryService {
             }
         }
 
-        return Optional.of(galleryRepository.save(gallery));
+        return Optional.of(galleryRepository.save(updatingImage));
     }
 
 

@@ -1,7 +1,6 @@
 package com.hexalyte.sf_serviceprovider_application.controller;
 
 import com.hexalyte.sf_serviceprovider_application.model.Offer;
-import com.hexalyte.sf_serviceprovider_application.model.Provider;
 import com.hexalyte.sf_serviceprovider_application.services.impl.OfferServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

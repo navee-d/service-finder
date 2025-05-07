@@ -57,5 +57,7 @@ public class Provider {
     @OneToMany(mappedBy = "provider")
     private List<ProviderSocialMedia> providerSocialMedia = new ArrayList<>();
 
+    @OneToMany(mappedBy = "provider")
+    private List<Offer> offer = new ArrayList<>();
 
 }

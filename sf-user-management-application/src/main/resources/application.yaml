@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: sf-user-management-application
+  profiles:
+    active: development
+server:
+  error:
+    include-message: always
+keycloak:
+  serverUrl: https://auth.hexalyte.com/
+  realm: service-finder-cloud
+  clientId: sf-user-management-application

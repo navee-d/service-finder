@@ -1,0 +1,42 @@
+package com.hexalyte.sf_user_management_application.controller;
+
+import com.hexalyte.sf_user_management_application.service.UserManagementService;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/users")
+public class UserManagementController {
+
+    private final UserManagementService service;
+
+    public UserManagementController(UserManagementService service) {
+        this.service = service;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserRepresentation>> getAllUsers() {
+        return ResponseEntity.ofNullable(service.getAllUsers());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserRepresentation> getUserById(@PathVariable String id) {
+        return ResponseEntity.of(service.getUserById(id));
+    }
+
+    @GetMapping("/groups/{id}")
+    public ResponseEntity<List<UserRepresentation>> getUsersInGroup(@PathVariable String id) {
+        return ResponseEntity.of(service.getUsersInGroup(id));
+    }
+
+    @GetMapping("search")
+    public ResponseEntity<List<UserRepresentation>> getUsersBySearch(@RequestParam("q") String query,
+                                                                     @RequestParam("pageNum") int pageNumber,
+                                                                     @RequestParam("resultsPerPage") int resultsPerPage) {
+        return ResponseEntity.ofNullable(service.getUsersBySearch(query, pageNumber, resultsPerPage));
+    }
+
+}

@@ -2,6 +2,7 @@ package com.hexalyte.sf_user_management_application.service.impl;
 
 import com.hexalyte.sf_user_management_application.service.UserManagementService;
 import jakarta.annotation.PostConstruct;
+import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.NotFoundException;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
@@ -74,6 +75,18 @@ public class UserManagementServiceImpl implements UserManagementService {
     @Override
     public List<RoleRepresentation> getUserRoles() {
         return realm.roles().list();
+    }
+
+    @Override
+    public void createRealmRole(RoleRepresentation role) {
+        try {
+            realm.roles().create(role);
+        } catch (ClientErrorException e) {
+            if (e.getMessage().equals("HTTP 409 Conflict"))
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "A realm role name " + role.getName() + " already exists.");
+            else
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
     }
 
     @Override

@@ -11,5 +11,6 @@ public interface UserManagementService {
     Optional<UserRepresentation> getUserById(String id);
     Optional<List<UserRepresentation>> getUsersInGroup(String id);
     List<RoleRepresentation> getUserRoles();
+    void createRealmRole(RoleRepresentation role);
     List<UserRepresentation> getUsersBySearch(String query, int pageNumber, int resultsPerPage);
 }

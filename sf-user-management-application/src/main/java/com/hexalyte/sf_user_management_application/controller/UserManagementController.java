@@ -1,6 +1,7 @@
 package com.hexalyte.sf_user_management_application.controller;
 
 import com.hexalyte.sf_user_management_application.service.UserManagementService;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +38,11 @@ public class UserManagementController {
                                                                      @RequestParam("pageNum") int pageNumber,
                                                                      @RequestParam("resultsPerPage") int resultsPerPage) {
         return ResponseEntity.ofNullable(service.getUsersBySearch(query, pageNumber, resultsPerPage));
+    }
+
+    @GetMapping("/roles")
+    public ResponseEntity<List<RoleRepresentation>> getUserRoles(){
+        return ResponseEntity.ofNullable(service.getUserRoles());
     }
 
 }

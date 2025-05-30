@@ -3,7 +3,9 @@ package com.hexalyte.sf_user_management_application.service.impl;
 import com.hexalyte.sf_user_management_application.service.UserManagementService;
 import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.NotFoundException;
+import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,15 +27,19 @@ public class UserManagementServiceImpl implements UserManagementService {
     private String realmName;
     @Value("${keycloak.clientId}")
     private String clientId;
-    @Value("${keycloak.username}")
-    private String username;
-    @Value("${keycloak.password}")
-    private String password;
+    @Value("${keycloak.clientSecret}")
+    private String clientSecret;
 
     @PostConstruct
     private void init() {
-        Keycloak keycloak = Keycloak.getInstance(serverUrl,
-                realmName, username, password, clientId);
+        Keycloak keycloak = KeycloakBuilder.builder()
+                .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
+                .serverUrl(serverUrl)
+                .realm(realmName)
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .scope(OAuth2Constants.SCOPE_OPENID)
+                .build();
         this.realm = keycloak.realm(realmName);
     }
 

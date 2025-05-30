@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/realm")
 public class UserManagementController {
 
     private final UserManagementService service;
@@ -17,22 +17,22 @@ public class UserManagementController {
         this.service = service;
     }
 
-    @GetMapping
+    @GetMapping("/users")
     public ResponseEntity<List<UserRepresentation>> getAllUsers() {
         return ResponseEntity.ofNullable(service.getAllUsers());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/users/{id}")
     public ResponseEntity<UserRepresentation> getUserById(@PathVariable String id) {
         return ResponseEntity.of(service.getUserById(id));
     }
 
-    @GetMapping("/groups/{id}")
+    @GetMapping("/users/groups/{id}")
     public ResponseEntity<List<UserRepresentation>> getUsersInGroup(@PathVariable String id) {
         return ResponseEntity.of(service.getUsersInGroup(id));
     }
 
-    @GetMapping("search")
+    @GetMapping("/users/search")
     public ResponseEntity<List<UserRepresentation>> getUsersBySearch(@RequestParam("q") String query,
                                                                      @RequestParam("pageNum") int pageNumber,
                                                                      @RequestParam("resultsPerPage") int resultsPerPage) {

@@ -9,6 +9,7 @@ import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -72,8 +73,16 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @Override
     public List<UserRepresentation> getUsersBySearch(String query, int pageNumber, int resultsPerPage) {
-        List<UserRepresentation> userList = realm.users().searchByAttributes((pageNumber - 1) * resultsPerPage,
-                resultsPerPage, true, false, query);
+        PageRequest pageRequest;
+        try {
+            pageRequest = PageRequest.of(pageNumber, resultsPerPage);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+
+        List<UserRepresentation> userList = realm.users().searchByAttributes(
+                (pageRequest.getPageNumber() - 1) * pageRequest.getPageSize(),
+                pageRequest.getPageSize(), true, false, query);
         if (userList.isEmpty())
             return null;
         return userList;

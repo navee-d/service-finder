@@ -34,8 +34,8 @@ public class UserManagementController {
 
     @GetMapping("/users/search")
     public ResponseEntity<List<UserRepresentation>> getUsersBySearch(@RequestParam("q") String query,
-                                                                     @RequestParam("pageNum") int pageNumber,
-                                                                     @RequestParam("resultsPerPage") int resultsPerPage) {
+                                                                     @RequestParam(value = "pageNum",defaultValue = "1") int pageNumber,
+                                                                     @RequestParam(value = "resultsPerPage",defaultValue = "5") int resultsPerPage) {
         return ResponseEntity.ofNullable(service.getUsersBySearch(query, pageNumber, resultsPerPage));
     }
 

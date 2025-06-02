@@ -80,6 +80,11 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
+    public List<RoleRepresentation> getClientRoles() {
+        return realm.clients().get(clientUuid).roles().list();
+    }
+
+    @Override
     public void createRealmRole(RoleRepresentation role) {
         try {
             realm.roles().create(role);

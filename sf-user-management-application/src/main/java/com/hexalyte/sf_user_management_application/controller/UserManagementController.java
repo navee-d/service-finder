@@ -46,6 +46,11 @@ public class UserManagementController {
         return ResponseEntity.ofNullable(service.getRealmRoles());
     }
 
+    @GetMapping("/client-roles")
+    public ResponseEntity<List<RoleRepresentation>> getClientRoles() {
+        return ResponseEntity.ofNullable(service.getClientRoles());
+    }
+
     @PostMapping("realm-roles")
     @ResponseStatus(value = HttpStatus.CREATED, reason = "Created realm role successfully")
     public void createRealmRole(@RequestBody RoleRepresentation role) {

@@ -10,7 +10,7 @@ public interface UserManagementService {
     List<UserRepresentation> getAllUsers();
     Optional<UserRepresentation> getUserById(String id);
     Optional<List<UserRepresentation>> getUsersInGroup(String id);
-    List<RoleRepresentation> getUserRoles();
+    List<RoleRepresentation> getRealmRoles();
     void createRealmRole(RoleRepresentation role);
     void createClientRole(RoleRepresentation role);
     List<UserRepresentation> getUsersBySearch(String query, int pageNumber, int resultsPerPage);

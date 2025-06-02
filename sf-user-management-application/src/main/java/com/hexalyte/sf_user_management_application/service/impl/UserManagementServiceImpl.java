@@ -75,7 +75,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
-    public List<RoleRepresentation> getUserRoles() {
+    public List<RoleRepresentation> getRealmRoles() {
         return realm.roles().list();
     }
 

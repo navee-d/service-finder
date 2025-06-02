@@ -41,9 +41,9 @@ public class UserManagementController {
         return ResponseEntity.ofNullable(service.getUsersBySearch(query, pageNumber, resultsPerPage));
     }
 
-    @GetMapping("/roles")
-    public ResponseEntity<List<RoleRepresentation>> getUserRoles() {
-        return ResponseEntity.ofNullable(service.getUserRoles());
+    @GetMapping("/realm-roles")
+    public ResponseEntity<List<RoleRepresentation>> getRealmRoles() {
+        return ResponseEntity.ofNullable(service.getRealmRoles());
     }
 
     @PostMapping("realm-roles")

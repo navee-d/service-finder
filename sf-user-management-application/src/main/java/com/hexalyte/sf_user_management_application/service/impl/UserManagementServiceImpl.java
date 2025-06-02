@@ -31,6 +31,8 @@ public class UserManagementServiceImpl implements UserManagementService {
     private String clientId;
     @Value("${keycloak.clientSecret}")
     private String clientSecret;
+    @Value("${keycloak.clientUuid}")
+    private String clientUuid;
 
     @PostConstruct
     private void init() {
@@ -84,6 +86,18 @@ public class UserManagementServiceImpl implements UserManagementService {
         } catch (ClientErrorException e) {
             if (e.getMessage().equals("HTTP 409 Conflict"))
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "A realm role name " + role.getName() + " already exists.");
+            else
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    @Override
+    public void createClientRole(RoleRepresentation role) {
+        try {
+            realm.clients().get(clientUuid).roles().create(role);
+        }  catch (ClientErrorException e) {
+            if (e.getMessage().equals("HTTP 409 Conflict"))
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "A client role name " + role.getName() + " already exists.");
             else
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }

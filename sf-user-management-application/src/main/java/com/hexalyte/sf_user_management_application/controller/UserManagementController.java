@@ -42,14 +42,20 @@ public class UserManagementController {
     }
 
     @GetMapping("/roles")
-    public ResponseEntity<List<RoleRepresentation>> getUserRoles(){
+    public ResponseEntity<List<RoleRepresentation>> getUserRoles() {
         return ResponseEntity.ofNullable(service.getUserRoles());
     }
 
     @PostMapping("realm-roles")
-    @ResponseStatus(value = HttpStatus.CREATED,reason = "Created realm role successfully")
-    public void createRealmRole(@RequestBody RoleRepresentation role){
+    @ResponseStatus(value = HttpStatus.CREATED, reason = "Created realm role successfully")
+    public void createRealmRole(@RequestBody RoleRepresentation role) {
         service.createRealmRole(role);
+    }
+
+    @PostMapping("client-roles")
+    @ResponseStatus(value = HttpStatus.CREATED, reason = "Created client role successfully")
+    public void createClientRole(@RequestBody RoleRepresentation role) {
+        service.createClientRole(role);
     }
 
 }

@@ -49,7 +49,10 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @Override
     public List<UserRepresentation> getAllUsers() {
-        return realm.users().list();
+        List<UserRepresentation> userList = realm.users().list();
+        if (userList.isEmpty())
+            return null;
+        return userList;
     }
 
     @Override
@@ -76,12 +79,18 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @Override
     public List<RoleRepresentation> getRealmRoles() {
-        return realm.roles().list();
+        List<RoleRepresentation> realmRolesList = realm.roles().list();
+        if (realmRolesList.isEmpty())
+            return null;
+        return realmRolesList;
     }
 
     @Override
     public List<RoleRepresentation> getClientRoles() {
-        return realm.clients().get(clientUuid).roles().list();
+        List<RoleRepresentation> clientRolesList = realm.clients().get(clientUuid).roles().list();
+        if (clientRolesList.isEmpty())
+            return null;
+        return clientRolesList;
     }
 
     @Override
@@ -100,7 +109,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     public void createClientRole(RoleRepresentation role) {
         try {
             realm.clients().get(clientUuid).roles().create(role);
-        }  catch (ClientErrorException e) {
+        } catch (ClientErrorException e) {
             if (e.getMessage().equals("HTTP 409 Conflict"))
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "A client role name " + role.getName() + " already exists.");
             else

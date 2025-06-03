@@ -51,16 +51,16 @@ public class UserManagementController {
         return ResponseEntity.ofNullable(service.getClientRoles());
     }
 
-    @PostMapping("realm-roles")
-    @ResponseStatus(value = HttpStatus.CREATED, reason = "Created realm role successfully")
-    public void createRealmRole(@RequestBody RoleRepresentation role) {
-        service.createRealmRole(role);
+    @PostMapping("users/{id}/realm-roles")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Assigned realm role to the user successfully")
+    public void assignUserRealmRole(@PathVariable String id, @RequestBody List<RoleRepresentation> roles) {
+        service.assignUserRealmRole(id, roles);
     }
 
-    @PostMapping("client-roles")
-    @ResponseStatus(value = HttpStatus.CREATED, reason = "Created client role successfully")
-    public void createClientRole(@RequestBody RoleRepresentation role) {
-        service.createClientRole(role);
+    @PostMapping("users/{id}/client-roles")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Assigned client role to the user successfully")
+    public void assignUserClientRole(@PathVariable String id, @RequestBody List<RoleRepresentation> roles) {
+        service.assignUserClientRole(id,roles);
     }
 
 }

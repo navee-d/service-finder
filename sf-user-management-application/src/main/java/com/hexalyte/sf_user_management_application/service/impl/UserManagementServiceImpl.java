@@ -2,12 +2,12 @@ package com.hexalyte.sf_user_management_application.service.impl;
 
 import com.hexalyte.sf_user_management_application.service.UserManagementService;
 import jakarta.annotation.PostConstruct;
-import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.NotFoundException;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.RoleScopeResource;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -94,27 +95,41 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
-    public void createRealmRole(RoleRepresentation role) {
-        try {
-            realm.roles().create(role);
-        } catch (ClientErrorException e) {
-            if (e.getMessage().equals("HTTP 409 Conflict"))
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "A realm role name " + role.getName() + " already exists.");
-            else
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    public void assignUserRealmRole(String id, List<RoleRepresentation> rolesToAdd) {
+        List<RoleRepresentation> addingRolesList = new ArrayList<>();
+        RoleScopeResource userRealmLevelRoles = realm.users().get(id).roles().realmLevel();
+
+        for (RoleRepresentation role : rolesToAdd) {
+            try {
+                RoleRepresentation addingRole = realm.roles().get(role.getName()).toRepresentation();
+                List<RoleRepresentation> userRealmRoles = userRealmLevelRoles.listAll();
+                if (userRealmRoles.contains(addingRole))
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Realm role: " + role.getName() + " is already assigned to the user.");
+                addingRolesList.add(addingRole);
+            } catch (NotFoundException e) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Realm role named " + role.getName() + " cannot be found.");
+            }
         }
+        userRealmLevelRoles.add(addingRolesList);
     }
 
     @Override
-    public void createClientRole(RoleRepresentation role) {
-        try {
-            realm.clients().get(clientUuid).roles().create(role);
-        } catch (ClientErrorException e) {
-            if (e.getMessage().equals("HTTP 409 Conflict"))
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "A client role name " + role.getName() + " already exists.");
-            else
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    public void assignUserClientRole(String id, List<RoleRepresentation> rolesToAdd) {
+        List<RoleRepresentation> addingRolesList = new ArrayList<>();
+        RoleScopeResource userClientLevelRoles = realm.users().get(id).roles().clientLevel(clientUuid);
+
+        for (RoleRepresentation role : rolesToAdd) {
+            try {
+                RoleRepresentation addingRole = realm.clients().get(clientUuid).roles().get(role.getName()).toRepresentation();
+                List<RoleRepresentation> userClientRoles = userClientLevelRoles.listAll();
+                if (userClientRoles.contains(addingRole))
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Client role: " + role.getName() + " is already assigned to the user.");
+                addingRolesList.add(addingRole);
+            } catch (NotFoundException e) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Client role named " + role.getName() + " cannot be found.");
+            }
         }
+        userClientLevelRoles.add(addingRolesList);
     }
 
     @Override

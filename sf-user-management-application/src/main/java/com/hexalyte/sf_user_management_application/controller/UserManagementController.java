@@ -41,16 +41,6 @@ public class UserManagementController {
         return ResponseEntity.ofNullable(service.getUsersBySearch(query, pageNumber, resultsPerPage));
     }
 
-    @GetMapping("/realm-roles")
-    public ResponseEntity<List<RoleRepresentation>> getRealmRoles() {
-        return ResponseEntity.ofNullable(service.getRealmRoles());
-    }
-
-    @GetMapping("/client-roles")
-    public ResponseEntity<List<RoleRepresentation>> getClientRoles() {
-        return ResponseEntity.ofNullable(service.getClientRoles());
-    }
-
     @PostMapping("users/{id}/realm-roles")
     @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Assigned realm role to the user successfully")
     public void assignUserRealmRole(@PathVariable String id, @RequestBody List<RoleRepresentation> roles) {

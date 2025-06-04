@@ -79,22 +79,6 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
-    public List<RoleRepresentation> getRealmRoles() {
-        List<RoleRepresentation> realmRolesList = realm.roles().list();
-        if (realmRolesList.isEmpty())
-            return null;
-        return realmRolesList;
-    }
-
-    @Override
-    public List<RoleRepresentation> getClientRoles() {
-        List<RoleRepresentation> clientRolesList = realm.clients().get(clientUuid).roles().list();
-        if (clientRolesList.isEmpty())
-            return null;
-        return clientRolesList;
-    }
-
-    @Override
     public void assignUserRealmRole(String id, List<RoleRepresentation> rolesToAdd) {
         List<RoleRepresentation> addingRolesList = new ArrayList<>();
         RoleScopeResource userRealmLevelRoles = realm.users().get(id).roles().realmLevel();

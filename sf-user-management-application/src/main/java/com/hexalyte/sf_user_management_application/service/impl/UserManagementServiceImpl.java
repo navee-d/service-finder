@@ -133,6 +133,44 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
+    public void unassignUserRealmRole(String id, List<RoleRepresentation> rolesToAdd) {
+        List<RoleRepresentation> removingRolesList = new ArrayList<>();
+        RoleScopeResource userRealmLevelRoles = realm.users().get(id).roles().realmLevel();
+
+        for (RoleRepresentation role : rolesToAdd) {
+            try {
+                RoleRepresentation addingRole = realm.roles().get(role.getName()).toRepresentation();
+                List<RoleRepresentation> userRealmRoles = userRealmLevelRoles.listAll();
+                if (!userRealmRoles.contains(addingRole))
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Realm role: " + role.getName() + " is already unassigned from the user.");
+                removingRolesList.add(addingRole);
+            } catch (NotFoundException e) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Realm role named " + role.getName() + " cannot be found.");
+            }
+        }
+        userRealmLevelRoles.remove(removingRolesList);
+    }
+
+    @Override
+    public void unassignUserClientRole(String id, List<RoleRepresentation> rolesToAdd) {
+        List<RoleRepresentation> removingRolesList = new ArrayList<>();
+        RoleScopeResource userClientLevelRoles = realm.users().get(id).roles().clientLevel(clientUuid);
+
+        for (RoleRepresentation role : rolesToAdd) {
+            try {
+                RoleRepresentation addingRole = realm.clients().get(clientUuid).roles().get(role.getName()).toRepresentation();
+                List<RoleRepresentation> userClientRoles = userClientLevelRoles.listAll();
+                if (!userClientRoles.contains(addingRole))
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Client role: " + role.getName() + " is already unassigned from the user.");
+                removingRolesList.add(addingRole);
+            } catch (NotFoundException e) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Client role named " + role.getName() + " cannot be found.");
+            }
+        }
+        userClientLevelRoles.remove(removingRolesList);
+    }
+
+    @Override
     public List<UserRepresentation> getUsersBySearch(String query, int pageNumber, int resultsPerPage) {
         List<UserRepresentation> userList = realm.users().searchByAttributes((pageNumber - 1) * resultsPerPage,
                 resultsPerPage, true, false, query);

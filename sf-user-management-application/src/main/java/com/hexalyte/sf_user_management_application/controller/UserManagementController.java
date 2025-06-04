@@ -63,4 +63,16 @@ public class UserManagementController {
         service.assignUserClientRole(id,roles);
     }
 
+    @DeleteMapping("users/{id}/realm-roles")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Unassigned realm role from the user successfully")
+    public void unassignUserRealmRole(@PathVariable String id, @RequestBody List<RoleRepresentation> roles) {
+        service.unassignUserRealmRole(id, roles);
+    }
+
+    @DeleteMapping("users/{id}/client-roles")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Unassigned client role from the user successfully")
+    public void unassignUserClientRole(@PathVariable String id, @RequestBody List<RoleRepresentation> roles) {
+        service.unassignUserClientRole(id,roles);
+    }
+
 }

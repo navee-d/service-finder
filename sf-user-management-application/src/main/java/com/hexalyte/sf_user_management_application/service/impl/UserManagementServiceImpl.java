@@ -81,6 +81,8 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @Override
     public void assignUserRealmRole(String id, List<RoleRepresentation> rolesToAdd) {
+        getUserById(id);
+
         List<RoleRepresentation> addingRolesList = new ArrayList<>();
         RoleScopeResource userRealmLevelRoles = realm.users().get(id).roles().realmLevel();
 
@@ -100,6 +102,8 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @Override
     public void assignUserClientRole(String id, List<RoleRepresentation> rolesToAdd) {
+        getUserById(id);
+
         List<RoleRepresentation> addingRolesList = new ArrayList<>();
         RoleScopeResource userClientLevelRoles = realm.users().get(id).roles().clientLevel(clientUuid);
 
@@ -119,6 +123,8 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @Override
     public void unassignUserRealmRole(String id, List<RoleRepresentation> rolesToAdd) {
+        getUserById(id);
+
         List<RoleRepresentation> removingRolesList = new ArrayList<>();
         RoleScopeResource userRealmLevelRoles = realm.users().get(id).roles().realmLevel();
 
@@ -138,6 +144,8 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @Override
     public void unassignUserClientRole(String id, List<RoleRepresentation> rolesToAdd) {
+        getUserById(id);
+
         List<RoleRepresentation> removingRolesList = new ArrayList<>();
         RoleScopeResource userClientLevelRoles = realm.users().get(id).roles().clientLevel(clientUuid);
 

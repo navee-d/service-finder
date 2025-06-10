@@ -66,9 +66,15 @@ public class UserManagementController {
     }
 
     @PutMapping("users/{userId}/groups/{groupId}")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Assigned user group successfully")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Assigned user to group successfully")
     public void assignUserGroup(@PathVariable String userId, @PathVariable String groupId) {
         service.assignUserGroup(userId, groupId);
+    }
+
+    @DeleteMapping("users/{userId}/groups/{groupId}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Unassigned user from group successfully")
+    public void unassignUserGroup(@PathVariable String userId, @PathVariable String groupId) {
+        service.unassignUserGroup(userId, groupId);
     }
 
 }

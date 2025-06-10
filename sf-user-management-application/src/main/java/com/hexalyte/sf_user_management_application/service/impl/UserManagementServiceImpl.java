@@ -178,6 +178,32 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
+    public void unassignUserGroup(String userId, String groupId) {
+        try {
+            realm.groups().group(groupId).toRepresentation();
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find group with such ID");
+        }
+
+        try {
+            boolean groupAvailable = false;
+            UserResource user = realm.users().get(userId);
+            for (GroupRepresentation userGroup : user.groups()) {
+                if (userGroup.getId().equals(groupId)) {
+                    groupAvailable = true;
+                    break;
+                }
+            }
+            if (!groupAvailable)
+                throw new ResponseStatusException(HttpStatus.GONE, "This group is already unassigned from the user " +
+                        "or has not assigned to the user");
+            user.leaveGroup(groupId);
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No user is found with such ID");
+        }
+    }
+
+    @Override
     public List<UserRepresentation> getUsersBySearch(String query, int pageNumber, int resultsPerPage) {
         PageRequest pageRequest;
         try {

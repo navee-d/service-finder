@@ -1,5 +1,7 @@
 package com.hexalyte.sf_user_management_application.service;
 
+import jakarta.ws.rs.core.Response;
+import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
@@ -14,5 +16,6 @@ public interface UserManagementService {
     void assignUserClientRole(String id, List<RoleRepresentation> rolesToAdd);
     void unassignUserRealmRole(String id, List<RoleRepresentation> rolesToAdd);
     void unassignUserClientRole(String id, List<RoleRepresentation> rolesToAdd);
+    void assignUserGroup(String userId, String groupId);
     List<UserRepresentation> getUsersBySearch(String query, int pageNumber, int resultsPerPage);
 }

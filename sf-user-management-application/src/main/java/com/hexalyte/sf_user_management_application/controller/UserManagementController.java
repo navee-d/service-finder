@@ -36,8 +36,8 @@ public class UserManagementController {
 
     @GetMapping("/users/search")
     public ResponseEntity<List<UserRepresentation>> getUsersBySearch(@RequestParam("q") String query,
-                                                                     @RequestParam(value = "pageNum",defaultValue = "1") int pageNumber,
-                                                                     @RequestParam(value = "resultsPerPage",defaultValue = "5") int resultsPerPage) {
+                                                                     @RequestParam(value = "pageNum", defaultValue = "1") int pageNumber,
+                                                                     @RequestParam(value = "resultsPerPage", defaultValue = "5") int resultsPerPage) {
         return ResponseEntity.ofNullable(service.getUsersBySearch(query, pageNumber, resultsPerPage));
     }
 
@@ -50,7 +50,7 @@ public class UserManagementController {
     @PostMapping("users/{id}/client-roles")
     @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Assigned client role to the user successfully")
     public void assignUserClientRole(@PathVariable String id, @RequestBody List<RoleRepresentation> roles) {
-        service.assignUserClientRole(id,roles);
+        service.assignUserClientRole(id, roles);
     }
 
     @DeleteMapping("users/{id}/realm-roles")
@@ -62,7 +62,13 @@ public class UserManagementController {
     @DeleteMapping("users/{id}/client-roles")
     @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Unassigned client role from the user successfully")
     public void unassignUserClientRole(@PathVariable String id, @RequestBody List<RoleRepresentation> roles) {
-        service.unassignUserClientRole(id,roles);
+        service.unassignUserClientRole(id, roles);
+    }
+
+    @PutMapping("users/{userId}/groups/{groupId}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Assigned user group successfully")
+    public void assignUserGroup(@PathVariable String userId, @PathVariable String groupId) {
+        service.assignUserGroup(userId, groupId);
     }
 
 }

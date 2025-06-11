@@ -6,6 +6,7 @@ import jakarta.ws.rs.NotFoundException;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.GroupResource;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.RoleScopeResource;
 import org.keycloak.admin.client.resource.UserResource;
@@ -209,6 +210,59 @@ public class UserManagementServiceImpl implements UserManagementService {
         } catch (NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No user is found with such ID");
         }
+    }
+
+    @Override
+    public void assignRealmRolesToGroup(String groupId, List<RoleRepresentation> rolesToAdd) {
+        List<RoleRepresentation> addingRoles = new ArrayList<>();
+        GroupResource group = realm.groups().group(groupId);
+
+        try {
+            group.toRepresentation();
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find group with such ID");
+        }
+
+        for (RoleRepresentation role : rolesToAdd) {
+            try {
+                List<RoleRepresentation> groupRealmRoles = group.roles().realmLevel().listAll();
+                RoleRepresentation addingRole = realm.roles().get(role.getName()).toRepresentation();
+                if (groupRealmRoles.contains(addingRole))
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, role.getName() + " realm role is already assigned to this group");
+                addingRoles.add(addingRole);
+            } catch (NotFoundException e) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find realm role named " + role.getName());
+            }
+        }
+
+        group.roles().realmLevel().add(addingRoles);
+    }
+
+    @Override
+    public void unassignRealmRolesToGroup(String groupId, List<RoleRepresentation> rolesToRemove) {
+        List<RoleRepresentation> removingRoles = new ArrayList<>();
+        GroupResource group = realm.groups().group(groupId);
+
+        try {
+            group.toRepresentation();
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find group with such ID");
+        }
+
+        for (RoleRepresentation role : rolesToRemove) {
+            try {
+                List<RoleRepresentation> groupRealmRoles = group.roles().realmLevel().listAll();
+                RoleRepresentation removingRole = realm.roles().get(role.getName()).toRepresentation();
+                if (!groupRealmRoles.contains(removingRole))
+                    throw new ResponseStatusException(HttpStatus.GONE, role.getName() + " realm role is " +
+                            "already unassigned or has not assigned to this group");
+                removingRoles.add(removingRole);
+            } catch (NotFoundException e) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find realm role named " + role.getName());
+            }
+        }
+
+        group.roles().realmLevel().remove(removingRoles);
     }
 
     @Override

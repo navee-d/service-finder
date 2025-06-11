@@ -239,7 +239,33 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
-    public void unassignRealmRolesToGroup(String groupId, List<RoleRepresentation> rolesToRemove) {
+    public void assignClientRolesToGroup(String groupId, List<RoleRepresentation> rolesToAdd) {
+        List<RoleRepresentation> addingRoles = new ArrayList<>();
+        GroupResource group = realm.groups().group(groupId);
+
+        try {
+            group.toRepresentation();
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find group with such ID");
+        }
+
+        for (RoleRepresentation role : rolesToAdd) {
+            try {
+                List<RoleRepresentation> groupClientRoles = group.roles().clientLevel(clientUuid).listAll();
+                RoleRepresentation addingRole = realm.clients().get(clientUuid).roles().get(role.getName()).toRepresentation();
+                if (groupClientRoles.contains(addingRole))
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, role.getName() + " client role is already assigned to this group");
+                addingRoles.add(addingRole);
+            } catch (NotFoundException e) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find client role named " + role.getName());
+            }
+        }
+
+        group.roles().clientLevel(clientUuid).add(addingRoles);
+    }
+
+    @Override
+    public void unassignRealmRolesFromGroup(String groupId, List<RoleRepresentation> rolesToRemove) {
         List<RoleRepresentation> removingRoles = new ArrayList<>();
         GroupResource group = realm.groups().group(groupId);
 
@@ -263,6 +289,33 @@ public class UserManagementServiceImpl implements UserManagementService {
         }
 
         group.roles().realmLevel().remove(removingRoles);
+    }
+
+    @Override
+    public void unassignClientRolesFromGroup(String groupId, List<RoleRepresentation> rolesToRemove) {
+        List<RoleRepresentation> removingRoles = new ArrayList<>();
+        GroupResource group = realm.groups().group(groupId);
+
+        try {
+            group.toRepresentation();
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find group with such ID");
+        }
+
+        for (RoleRepresentation role : rolesToRemove) {
+            try {
+                List<RoleRepresentation> groupClientRoles = group.roles().clientLevel(clientUuid).listAll();
+                RoleRepresentation removingRole = realm.clients().get(clientUuid).roles().get(role.getName()).toRepresentation();
+                if (!groupClientRoles.contains(removingRole))
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, role.getName() + " client role is already unassigned " +
+                            "or has no assigned to this group");
+                removingRoles.add(removingRole);
+            } catch (NotFoundException e) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find client role named " + role.getName());
+            }
+        }
+
+        group.roles().clientLevel(clientUuid).remove(removingRoles);
     }
 
     @Override

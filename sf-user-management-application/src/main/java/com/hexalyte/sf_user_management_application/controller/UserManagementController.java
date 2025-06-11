@@ -83,10 +83,22 @@ public class UserManagementController {
         service.assignRealmRolesToGroup(groupId, roles);
     }
 
+    @PostMapping("groups/{groupId}/client-roles")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Assigned client roles to group successfully")
+    public void assignClientRolesToGroup(@PathVariable String groupId, @RequestBody List<RoleRepresentation> roles) {
+        service.assignClientRolesToGroup(groupId, roles);
+    }
+
     @DeleteMapping("groups/{groupId}/realm-roles")
     @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Unassigned realm roles from group successfully")
     public void unassignRealmRolesToGroup(@PathVariable String groupId, @RequestBody List<RoleRepresentation> roles) {
-        service.unassignRealmRolesToGroup(groupId, roles);
+        service.unassignRealmRolesFromGroup(groupId, roles);
+    }
+
+    @DeleteMapping("groups/{groupId}/client-roles")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Unassigned realm roles from group successfully")
+    public void unassignClientRolesFromGroup(@PathVariable String groupId, @RequestBody List<RoleRepresentation> roles) {
+        service.unassignClientRolesFromGroup(groupId, roles);
     }
 
 }

@@ -83,6 +83,8 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @Override
     public void assignUserRealmRole(String id, List<RoleRepresentation> rolesToAdd) {
+        getUserById(id);
+
         List<RoleRepresentation> addingRolesList = new ArrayList<>();
         RoleScopeResource userRealmLevelRoles = realm.users().get(id).roles().realmLevel();
 
@@ -91,7 +93,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                 RoleRepresentation addingRole = realm.roles().get(role.getName()).toRepresentation();
                 List<RoleRepresentation> userRealmRoles = userRealmLevelRoles.listAll();
                 if (userRealmRoles.contains(addingRole))
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Realm role: " + role.getName() + " is already assigned to the user.");
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Realm role: " + role.getName() + " is already assigned to the user.");
                 addingRolesList.add(addingRole);
             } catch (NotFoundException e) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Realm role named " + role.getName() + " cannot be found.");
@@ -102,6 +104,8 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @Override
     public void assignUserClientRole(String id, List<RoleRepresentation> rolesToAdd) {
+        getUserById(id);
+
         List<RoleRepresentation> addingRolesList = new ArrayList<>();
         RoleScopeResource userClientLevelRoles = realm.users().get(id).roles().clientLevel(clientUuid);
 
@@ -110,7 +114,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                 RoleRepresentation addingRole = realm.clients().get(clientUuid).roles().get(role.getName()).toRepresentation();
                 List<RoleRepresentation> userClientRoles = userClientLevelRoles.listAll();
                 if (userClientRoles.contains(addingRole))
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Client role: " + role.getName() + " is already assigned to the user.");
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Client role: " + role.getName() + " is already assigned to the user.");
                 addingRolesList.add(addingRole);
             } catch (NotFoundException e) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Client role named " + role.getName() + " cannot be found.");
@@ -121,6 +125,8 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @Override
     public void unassignUserRealmRole(String id, List<RoleRepresentation> rolesToAdd) {
+        getUserById(id);
+
         List<RoleRepresentation> removingRolesList = new ArrayList<>();
         RoleScopeResource userRealmLevelRoles = realm.users().get(id).roles().realmLevel();
 
@@ -129,7 +135,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                 RoleRepresentation addingRole = realm.roles().get(role.getName()).toRepresentation();
                 List<RoleRepresentation> userRealmRoles = userRealmLevelRoles.listAll();
                 if (!userRealmRoles.contains(addingRole))
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Realm role: " + role.getName() + " is already unassigned from the user.");
+                    throw new ResponseStatusException(HttpStatus.GONE, "Realm role: " + role.getName() + " is already unassigned from the user.");
                 removingRolesList.add(addingRole);
             } catch (NotFoundException e) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Realm role named " + role.getName() + " cannot be found.");
@@ -140,6 +146,8 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @Override
     public void unassignUserClientRole(String id, List<RoleRepresentation> rolesToAdd) {
+        getUserById(id);
+
         List<RoleRepresentation> removingRolesList = new ArrayList<>();
         RoleScopeResource userClientLevelRoles = realm.users().get(id).roles().clientLevel(clientUuid);
 
@@ -148,7 +156,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                 RoleRepresentation addingRole = realm.clients().get(clientUuid).roles().get(role.getName()).toRepresentation();
                 List<RoleRepresentation> userClientRoles = userClientLevelRoles.listAll();
                 if (!userClientRoles.contains(addingRole))
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Client role: " + role.getName() + " is already unassigned from the user.");
+                    throw new ResponseStatusException(HttpStatus.GONE, "Client role: " + role.getName() + " is already unassigned from the user.");
                 removingRolesList.add(addingRole);
             } catch (NotFoundException e) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Client role named " + role.getName() + " cannot be found.");

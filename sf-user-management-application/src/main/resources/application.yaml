@@ -11,3 +11,4 @@ keycloak:
   realm: service-finder-cloud
   clientId: sf-user-management-application
   clientSecret: KuGQBvfjpDgsl9tUkfsFW12MBEtvcMbE
+  clientUuid: 6f1228a4-f19f-4286-8e03-adfa776a3aec

@@ -7,6 +7,8 @@ import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.RoleScopeResource;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +33,8 @@ public class UserManagementServiceImpl implements UserManagementService {
     private String clientId;
     @Value("${keycloak.clientSecret}")
     private String clientSecret;
+    @Value("${keycloak.clientUuid}")
+    private String clientUuid;
 
     @PostConstruct
     private void init() {
@@ -46,7 +51,10 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @Override
     public List<UserRepresentation> getAllUsers() {
-        return realm.users().list();
+        List<UserRepresentation> userList = realm.users().list();
+        if (userList.isEmpty())
+            return null;
+        return userList;
     }
 
     @Override
@@ -69,6 +77,90 @@ public class UserManagementServiceImpl implements UserManagementService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No group is found with such ID");
         }
         return Optional.of(groupMembers);
+    }
+
+    @Override
+    public void assignUserRealmRole(String id, List<RoleRepresentation> rolesToAdd) {
+        getUserById(id);
+
+        List<RoleRepresentation> addingRolesList = new ArrayList<>();
+        RoleScopeResource userRealmLevelRoles = realm.users().get(id).roles().realmLevel();
+
+        for (RoleRepresentation role : rolesToAdd) {
+            try {
+                RoleRepresentation addingRole = realm.roles().get(role.getName()).toRepresentation();
+                List<RoleRepresentation> userRealmRoles = userRealmLevelRoles.listAll();
+                if (userRealmRoles.contains(addingRole))
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Realm role: " + role.getName() + " is already assigned to the user.");
+                addingRolesList.add(addingRole);
+            } catch (NotFoundException e) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Realm role named " + role.getName() + " cannot be found.");
+            }
+        }
+        userRealmLevelRoles.add(addingRolesList);
+    }
+
+    @Override
+    public void assignUserClientRole(String id, List<RoleRepresentation> rolesToAdd) {
+        getUserById(id);
+
+        List<RoleRepresentation> addingRolesList = new ArrayList<>();
+        RoleScopeResource userClientLevelRoles = realm.users().get(id).roles().clientLevel(clientUuid);
+
+        for (RoleRepresentation role : rolesToAdd) {
+            try {
+                RoleRepresentation addingRole = realm.clients().get(clientUuid).roles().get(role.getName()).toRepresentation();
+                List<RoleRepresentation> userClientRoles = userClientLevelRoles.listAll();
+                if (userClientRoles.contains(addingRole))
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Client role: " + role.getName() + " is already assigned to the user.");
+                addingRolesList.add(addingRole);
+            } catch (NotFoundException e) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Client role named " + role.getName() + " cannot be found.");
+            }
+        }
+        userClientLevelRoles.add(addingRolesList);
+    }
+
+    @Override
+    public void unassignUserRealmRole(String id, List<RoleRepresentation> rolesToAdd) {
+        getUserById(id);
+
+        List<RoleRepresentation> removingRolesList = new ArrayList<>();
+        RoleScopeResource userRealmLevelRoles = realm.users().get(id).roles().realmLevel();
+
+        for (RoleRepresentation role : rolesToAdd) {
+            try {
+                RoleRepresentation addingRole = realm.roles().get(role.getName()).toRepresentation();
+                List<RoleRepresentation> userRealmRoles = userRealmLevelRoles.listAll();
+                if (!userRealmRoles.contains(addingRole))
+                    throw new ResponseStatusException(HttpStatus.GONE, "Realm role: " + role.getName() + " is already unassigned from the user.");
+                removingRolesList.add(addingRole);
+            } catch (NotFoundException e) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Realm role named " + role.getName() + " cannot be found.");
+            }
+        }
+        userRealmLevelRoles.remove(removingRolesList);
+    }
+
+    @Override
+    public void unassignUserClientRole(String id, List<RoleRepresentation> rolesToAdd) {
+        getUserById(id);
+
+        List<RoleRepresentation> removingRolesList = new ArrayList<>();
+        RoleScopeResource userClientLevelRoles = realm.users().get(id).roles().clientLevel(clientUuid);
+
+        for (RoleRepresentation role : rolesToAdd) {
+            try {
+                RoleRepresentation addingRole = realm.clients().get(clientUuid).roles().get(role.getName()).toRepresentation();
+                List<RoleRepresentation> userClientRoles = userClientLevelRoles.listAll();
+                if (!userClientRoles.contains(addingRole))
+                    throw new ResponseStatusException(HttpStatus.GONE, "Client role: " + role.getName() + " is already unassigned from the user.");
+                removingRolesList.add(addingRole);
+            } catch (NotFoundException e) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Client role named " + role.getName() + " cannot be found.");
+            }
+        }
+        userClientLevelRoles.remove(removingRolesList);
     }
 
     @Override

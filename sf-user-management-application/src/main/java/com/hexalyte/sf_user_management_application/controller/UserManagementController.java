@@ -1,7 +1,9 @@
 package com.hexalyte.sf_user_management_application.controller;
 
 import com.hexalyte.sf_user_management_application.service.UserManagementService;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,6 +39,30 @@ public class UserManagementController {
                                                                      @RequestParam(value = "pageNum",defaultValue = "1") int pageNumber,
                                                                      @RequestParam(value = "resultsPerPage",defaultValue = "5") int resultsPerPage) {
         return ResponseEntity.ofNullable(service.getUsersBySearch(query, pageNumber, resultsPerPage));
+    }
+
+    @PostMapping("users/{id}/realm-roles")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Assigned realm role to the user successfully")
+    public void assignUserRealmRole(@PathVariable String id, @RequestBody List<RoleRepresentation> roles) {
+        service.assignUserRealmRole(id, roles);
+    }
+
+    @PostMapping("users/{id}/client-roles")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Assigned client role to the user successfully")
+    public void assignUserClientRole(@PathVariable String id, @RequestBody List<RoleRepresentation> roles) {
+        service.assignUserClientRole(id,roles);
+    }
+
+    @DeleteMapping("users/{id}/realm-roles")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Unassigned realm role from the user successfully")
+    public void unassignUserRealmRole(@PathVariable String id, @RequestBody List<RoleRepresentation> roles) {
+        service.unassignUserRealmRole(id, roles);
+    }
+
+    @DeleteMapping("users/{id}/client-roles")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Unassigned client role from the user successfully")
+    public void unassignUserClientRole(@PathVariable String id, @RequestBody List<RoleRepresentation> roles) {
+        service.unassignUserClientRole(id,roles);
     }
 
 }

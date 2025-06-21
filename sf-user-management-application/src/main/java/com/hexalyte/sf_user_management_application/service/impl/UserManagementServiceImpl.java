@@ -8,6 +8,8 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.RoleScopeResource;
+import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
@@ -161,6 +163,52 @@ public class UserManagementServiceImpl implements UserManagementService {
             }
         }
         userClientLevelRoles.remove(removingRolesList);
+    }
+
+    @Override
+    public void assignUserGroup(String userId, String groupId) {
+        try {
+            realm.groups().group(groupId).toRepresentation();
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find group with such ID");
+        }
+
+        try {
+            UserResource user = realm.users().get(userId);
+            for (GroupRepresentation userGroup : user.groups()) {
+                if (userGroup.getId().equals(groupId))
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "This group is already assigned to the user");
+            }
+            user.joinGroup(groupId);
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No user is found with such ID");
+        }
+    }
+
+    @Override
+    public void unassignUserGroup(String userId, String groupId) {
+        try {
+            realm.groups().group(groupId).toRepresentation();
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find group with such ID");
+        }
+
+        try {
+            boolean groupAvailable = false;
+            UserResource user = realm.users().get(userId);
+            for (GroupRepresentation userGroup : user.groups()) {
+                if (userGroup.getId().equals(groupId)) {
+                    groupAvailable = true;
+                    break;
+                }
+            }
+            if (!groupAvailable)
+                throw new ResponseStatusException(HttpStatus.GONE, "This group is already unassigned from the user " +
+                        "or has not assigned to the user");
+            user.leaveGroup(groupId);
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No user is found with such ID");
+        }
     }
 
     @Override

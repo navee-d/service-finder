@@ -14,5 +14,7 @@ public interface UserManagementService {
     void assignUserClientRole(String id, List<RoleRepresentation> rolesToAdd);
     void unassignUserRealmRole(String id, List<RoleRepresentation> rolesToAdd);
     void unassignUserClientRole(String id, List<RoleRepresentation> rolesToAdd);
+    void assignUserGroup(String userId, String groupId);
+    void unassignUserGroup(String userId, String groupId);
     List<UserRepresentation> getUsersBySearch(String query, int pageNumber, int resultsPerPage);
 }

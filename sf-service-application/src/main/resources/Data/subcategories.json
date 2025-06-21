@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Subcategory 1",
+    "description": "Description of subcategory 1",
+    "category": 3
+  },
+  {
+    "name": "Subcategory 2",
+    "description": "Description of subcategory 2",
+    "category": 4
+  },
+  {
+    "name": "Subcategory 3",
+    "description": "Description of subcategory 3",
+    "category": 2
+  },
+  {
+    "name": "Subcategory 4",
+    "description": "Description of subcategory 4",
+    "category": 1
+  },
+  {
+    "name": "Subcategory 5",
+    "description": "Description of subcategory 5",
+    "category": 2
+  }
+]

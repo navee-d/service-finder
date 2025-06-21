@@ -4,12 +4,14 @@ spring:
       hibernate:
         column_ordering_strategy: legacy
     hibernate:
-      ddl-auto: 'create'
+      ddl-auto: 'update'
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/sf_service_application_db?createDatabaseIfNotExist=true
+    url: jdbc:mysql://localhost:3306/sf_provider_application_db?createDatabaseIfNotExist=true
+    username: root
+    password: Yobivar@5453
   profiles:
     active: development
 server:

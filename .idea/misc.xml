@@ -8,6 +8,7 @@
         <option value="$PROJECT_DIR$/sf-serviceprovider-application/pom.xml" />
         <option value="$PROJECT_DIR$/sf-provider-application/pom.xml" />
         <option value="$PROJECT_DIR$/sf-gallery-application/pom.xml" />
+        <option value="$PROJECT_DIR$/sf-user-management-application/pom.xml" />
       </list>
     </option>
   </component>

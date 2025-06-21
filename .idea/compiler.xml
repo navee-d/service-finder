@@ -8,6 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="sf-service-application" />
+        <module name="sf-user-management-application" />
       </profile>
       <profile name="Annotation profile for sf_gallery_application" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -25,6 +26,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="sf-gallery-application" options="-parameters" />
       <module name="sf-service-application" options="-parameters" />
+      <module name="sf-user-management-application" options="-parameters" />
       <module name="sf_gallery_application" options="-parameters" />
     </option>
   </component>

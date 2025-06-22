@@ -1,4 +1,12 @@
 spring:
+  cloud:
+    discovery:
+      client:
+        simple:
+          local:
+            host: localhost
+  application:
+    name: sf-service-application
   jpa:
     properties:
       hibernate:
@@ -15,3 +23,7 @@ spring:
 server:
   error:
     include-message: ALWAYS
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka

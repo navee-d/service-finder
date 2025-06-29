@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: sf-serviceprovider-application
   jpa:
     properties:
       hibernate:
@@ -17,3 +19,4 @@ spring:
 server:
   error:
     include-message: ALWAYS
+  port: 8084

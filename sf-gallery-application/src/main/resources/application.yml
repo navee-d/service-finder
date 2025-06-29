@@ -29,3 +29,6 @@ object-storage:
   buckets:
      images: "${object-storage.bucket-policy-config-dir}/imagebucketpolicy.json"
      documents: "${object-storage.bucket-policy-config-dir}/documentsbucketpolicy.json"
+eureka:
+  instance:
+    prefer-ip-address: true

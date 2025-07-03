@@ -9,4 +9,6 @@ public interface BookingService {
     List<Booking> getAllBookings();
     Optional<Booking> getBookingById(Long id);
     Optional<Booking> addBooking(Booking booking);
+    Optional<Booking> updateBooking(Long id, Booking booking);
+    void deleteBooking(Long id);
 }

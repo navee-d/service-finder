@@ -37,6 +37,35 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Optional<Booking> addBooking(Booking booking) {
-        return Optional.empty();
+        return Optional.of(bookingRepository.save(booking));
+    }
+
+    @Override
+    public Optional<Booking> updateBooking(Long id, Booking booking) {
+        Booking updatingBooking = bookingRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find booking by this ID")
+        );
+        updatingBooking
+                .setServiceId(booking.getServiceId())
+                .setServiceProviderId(booking.getServiceProviderId())
+                .setUserId(booking.getUserId())
+                .setStatus(booking.getStatus())
+                .setTotalPrice(booking.getTotalPrice());
+
+        if (!updatingBooking.getDate().isEqual(booking.getDate()))
+            updatingBooking.setDate(booking.getDate());
+        if (!updatingBooking.getTime().equals(booking.getTime()))
+            updatingBooking.setTime(booking.getTime());
+
+        return Optional.of(bookingRepository.save(updatingBooking));
+    }
+
+    @Override
+    public void deleteBooking(Long id) {
+        bookingRepository.delete(
+                bookingRepository.findById(id).orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find booking by this ID")
+                )
+        );
     }
 }

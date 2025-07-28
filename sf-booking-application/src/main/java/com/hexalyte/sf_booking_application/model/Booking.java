@@ -12,9 +12,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Entity
 @Table(name = "bookings")
@@ -36,15 +34,15 @@ public class Booking {
     @Column(name = "ServiceID")
     private Long serviceId;
 
-    @Column(name = "Date", nullable = false)
-    @FutureOrPresent(message = "Date cannot be a past date")
-    @NotNull(message = "Date cannot be empty")
-    private LocalDate date;
+    @Column(name = "StartTime", nullable = false)
+    @FutureOrPresent(message = "Start time cannot be a past date and time")
+    @NotNull(message = "Start time cannot be empty")
+    private LocalDateTime startTime;
 
-    @Column(name = "Time", nullable = false, columnDefinition = "TIME")
-    @FutureOrPresent(message = "Time cannot be a past time")
-    @NotNull(message = "Time cannot be empty")
-    private LocalTime time;
+    @Column(name = "EndTime", nullable = false, columnDefinition = "TIME")
+    @FutureOrPresent(message = "Start time cannot be a past date and time")
+    @NotNull(message = "Start time cannot be empty")
+    private LocalDateTime endTime;
 
     @Column(name = "Status", nullable = false)
     @Enumerated(value = EnumType.STRING)

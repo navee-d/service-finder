@@ -37,6 +37,10 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Optional<Booking> addBooking(Booking booking) {
+
+        if (booking.getStartTime().isAfter(booking.getEndTime()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Start time cannot be a time after end time");
+
         return Optional.of(bookingRepository.save(booking));
     }
 
@@ -45,6 +49,10 @@ public class BookingServiceImpl implements BookingService {
         Booking updatingBooking = bookingRepository.findById(id).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find booking by this ID")
         );
+
+        if (booking.getStartTime().isAfter(booking.getEndTime()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Start time cannot be a time after end time");
+
         updatingBooking
                 .setServiceId(booking.getServiceId())
                 .setServiceProviderId(booking.getServiceProviderId())
@@ -52,10 +60,10 @@ public class BookingServiceImpl implements BookingService {
                 .setStatus(booking.getStatus())
                 .setTotalPrice(booking.getTotalPrice());
 
-        if (!updatingBooking.getDate().isEqual(booking.getDate()))
-            updatingBooking.setDate(booking.getDate());
-        if (!updatingBooking.getTime().equals(booking.getTime()))
-            updatingBooking.setTime(booking.getTime());
+        if (!updatingBooking.getStartTime().isEqual(booking.getStartTime()))
+            updatingBooking.setStartTime(booking.getStartTime());
+        if (!updatingBooking.getEndTime().equals(booking.getEndTime()))
+            updatingBooking.setEndTime(booking.getEndTime());
 
         return Optional.of(bookingRepository.save(updatingBooking));
     }

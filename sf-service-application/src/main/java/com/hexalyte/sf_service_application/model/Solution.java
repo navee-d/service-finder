@@ -87,4 +87,6 @@ public class Solution {
     @OneToMany(mappedBy = "solution", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<SubCategorySolution> subCategorySolutions;
 
+    @Column(name = "ServiceProviderID")
+    private Long serviceProviderId;
 }

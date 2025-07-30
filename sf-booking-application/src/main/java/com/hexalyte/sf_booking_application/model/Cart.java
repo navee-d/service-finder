@@ -1,5 +1,6 @@
 package com.hexalyte.sf_booking_application.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -21,6 +22,7 @@ public class Cart {
     @Column(name = "total",columnDefinition = "DECIMAL(10,2)")
     private Double total;
 
-    @OneToMany(mappedBy = "cart")
+    @OneToMany(mappedBy = "cart",cascade = {CascadeType.PERSIST})
+    @JsonManagedReference("cartItems")
     private List<CartItem> cartItems;
 }

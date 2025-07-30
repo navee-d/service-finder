@@ -1,5 +1,6 @@
 package com.hexalyte.sf_booking_application.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.ColumnDefault;
@@ -38,20 +39,21 @@ public class CartItem {
     @Column(name = "NetPrice", nullable = false, columnDefinition = "DECIMAL(10,2)")
     private int netPrice;
 
-    @Column(name = "Description",columnDefinition = "TEXT")
+    @Column(name = "Description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "CreatedAt",columnDefinition = "TIMESTAMP",updatable = false)
+    @Column(name = "CreatedAt", columnDefinition = "TIMESTAMP", updatable = false)
     @ColumnDefault("CURRENT_TIMESTAMP")
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Column(name = "UpdatedAt",columnDefinition = "TIMESTAMP")
+    @Column(name = "UpdatedAt", columnDefinition = "TIMESTAMP")
     @ColumnDefault("CURRENT_TIMESTAMP")
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
     @ManyToOne
-    @JoinColumn(name = "CartID")
+    @JoinColumn(name = "CartID", nullable = false)
+    @JsonBackReference("cartItems")
     private Cart cart;
 }

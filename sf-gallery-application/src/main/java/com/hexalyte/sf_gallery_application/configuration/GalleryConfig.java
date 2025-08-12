@@ -6,11 +6,9 @@ import io.minio.messages.DeleteObject;
 import io.minio.messages.Item;
 import lombok.Getter;
 import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
@@ -30,8 +28,8 @@ public class GalleryConfig implements CommandLineRunner {
     private final MinioClient minioClient;
     private final Map<String, String> buckets;
 
-    public GalleryConfig(final String endpoint, final Map<String, String> buckets) {
-        this.minioClient = MinioClient.builder().endpoint(endpoint).credentials("minioadmin", "minioadmin").build();
+    public GalleryConfig(final String endpoint, final Map<String, String> buckets,final String accessKey,final String secretKey) {
+        this.minioClient = MinioClient.builder().endpoint(endpoint).credentials(accessKey, secretKey).build();
         this.buckets = buckets;
     }
 

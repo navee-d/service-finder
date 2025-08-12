@@ -12,7 +12,9 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "bookings")
@@ -26,13 +28,13 @@ public class Booking {
     private Long bookingId;
 
     @Column(name = "UserID")
-    private Long userId;
+    private UUID userId;
 
     @Column(name = "ServiceProviderID")
     private Long serviceProviderId;
 
     @Column(name = "ServiceID")
-    private Long serviceId;
+    private int serviceId;
 
     @Column(name = "StartTime", nullable = false)
     @FutureOrPresent(message = "Start time cannot be a past date and time")
@@ -53,7 +55,7 @@ public class Booking {
     @Column(name = "TotalPrice", nullable = false, columnDefinition = "DECIMAL(10,2)")
     @PositiveOrZero(message = "Total price cannot be a negative number")
     @NotNull(message = "Total price cannot be empty")
-    private Double totalPrice;
+    private BigDecimal totalPrice;
 
     @Column(name = "CreatedAt", columnDefinition = "TIMESTAMP", updatable = false)
     @ColumnDefault("CURRENT_TIMESTAMP")

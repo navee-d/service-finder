@@ -23,6 +23,8 @@ object-storage:
   image-part-size: 5 * 1024 * 1024L
   doc-part-size: 10 * 1024 * 1024L
   endpoint: http://127.0.0.1:9000
+  accessKey: minioadmin
+  secretKey: minioadmin
   buckets:
      images: "${object-storage.bucket-policy-config-dir}/imagebucketpolicy.json"
      documents: "${object-storage.bucket-policy-config-dir}/documentsbucketpolicy.json"

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("bookings")
@@ -30,6 +31,16 @@ public class BookingController {
         return ResponseEntity.of(service.getBookingById(id));
     }
 
+    @GetMapping("users/{id}")
+    private ResponseEntity<List<Booking>> getBookingByUserId(@PathVariable UUID id) {
+        return ResponseEntity.of(service.getBookingByUserId(id));
+    }
+
+    @GetMapping("service-providers/{id}")
+    private ResponseEntity<List<Booking>> getBookingByServiceProviderId(@PathVariable long id) {
+        return ResponseEntity.of(service.getBookingByServiceProviderId(id));
+    }
+
     @PostMapping
     private ResponseEntity<Optional<Booking>> addBooking(@Valid @RequestBody Booking booking) {
         return new ResponseEntity<>(service.addBooking(booking), HttpStatus.CREATED);
@@ -40,9 +51,4 @@ public class BookingController {
         return ResponseEntity.of(service.updateBooking(id, booking));
     }
 
-    @DeleteMapping("{id}")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Booking deleted successfully")
-    private void deleteBooking(@PathVariable Long id) {
-        service.deleteBooking(id);
-    }
 }

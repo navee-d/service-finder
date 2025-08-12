@@ -3,6 +3,8 @@ package com.hexalyte.sf_booking_application.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "Discount")
 @Data
@@ -21,5 +23,5 @@ public class Discount {
     private DiscountType discountType;
 
     @Column(name = "value",columnDefinition = "DECIMAL(10,2)",nullable = false)
-    private Double value;
+    private BigDecimal value;
 }

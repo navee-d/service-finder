@@ -116,7 +116,7 @@ public class SolutionServiceImpl implements SolutionService {
             );
 
         updatingSolution
-                .setUserId(solution.getUserId())
+                .setServiceProviderId(solution.getServiceProviderId())
                 .setName(solution.getName())
                 .setCategory(solution.getCategory())
                 .setSubCategory(solution.getSubCategory())

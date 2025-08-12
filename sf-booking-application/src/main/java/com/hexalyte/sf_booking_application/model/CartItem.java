@@ -1,12 +1,16 @@
 package com.hexalyte.sf_booking_application.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.hexalyte.sf_booking_application.model.deserializer.DiscountDeserializer;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,21 +27,23 @@ public class CartItem {
     private Long serviceProviderId;
 
     @Column(name = "ServiceID")
-    private Long serviceId;
+    private int serviceId;
 
     @Column(name = "Quantity", nullable = false)
     @ColumnDefault("1")
+    @Positive(message = "Quantity cannot be negative or zero")
     private int quantity;
 
     @Column(name = "GrossPrice", nullable = false, columnDefinition = "DECIMAL(10,2)")
-    private int grossPrice;
+    private BigDecimal grossPrice;
 
     @ManyToOne
     @JoinColumn(name = "DiscountID")
-    private Discount discountId;
+    @JsonDeserialize(converter = DiscountDeserializer.class)
+    private Discount discount;
 
     @Column(name = "NetPrice", nullable = false, columnDefinition = "DECIMAL(10,2)")
-    private int netPrice;
+    private BigDecimal netPrice;
 
     @Column(name = "Description", columnDefinition = "TEXT")
     private String description;

@@ -41,7 +41,7 @@ public class Booking {
     @NotNull(message = "Start time cannot be empty")
     private LocalDateTime startTime;
 
-    @Column(name = "EndTime", nullable = false, columnDefinition = "TIME")
+    @Column(name = "EndTime", nullable = false)
     @FutureOrPresent(message = "Start time cannot be a past date and time")
     @NotNull(message = "Start time cannot be empty")
     private LocalDateTime endTime;

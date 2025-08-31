@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: sf-api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true
+          routes:
+            - id: sf-user-management-application
+              uri: lb:http://SF-USER-MANAGEMENT-APPLICATION
+              predicates:
+                - Path=/users/**,/groups/**
+              filters:
+                - PrefixPath=/realm
+            - id: sf-service-application
+              uri: lb:http://SF-SERVICE-APPLICATION
+              predicates:
+                - Path=/services/**,/categories/**,/subcategories/**
+            - id: sf-serviceprovider-application
+              uri: lb:http://SF-SERVICEPROVIDER-APPLICATION
+              predicates:
+                - Path=/offers/**,/providers,/provider/**,/socialmedia/**
+            - id: sf-gallery-application
+              uri: lb:http://SF-GALLERY-APPLICATION
+              predicates:
+                - Path=/documents/**,/gallery/**
+server:
+  port: 8070

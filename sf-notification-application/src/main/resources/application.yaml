@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: sf-notification-application
+  profiles:
+    active: development
+  mail:
+    host: hostname
+    port: 0
+    password: password
+    username: username
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+server:
+  error:
+    include-message: always

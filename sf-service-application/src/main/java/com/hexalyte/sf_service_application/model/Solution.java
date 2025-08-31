@@ -15,6 +15,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.Length;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -30,9 +31,6 @@ public class Solution {
     @Column(name = "ServiceID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer solutionId;
-
-    @Column(name = "UserID")
-    private Integer userId;
 
     @Column(name = "Name", length = 100, nullable = false)
     @NotBlank(message = "Service name cannot be null")
@@ -54,7 +52,7 @@ public class Solution {
 
     @Column(name = "Price", nullable = false, columnDefinition = "DECIMAL(10,2)")
     @NotNull(message = "Price cannot be null")
-    private Double price;
+    private BigDecimal price;
 
     @Column(name = "EstimatedTime")
     @Positive(message = "Estimated time must be a positive value")
@@ -87,4 +85,6 @@ public class Solution {
     @OneToMany(mappedBy = "solution", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<SubCategorySolution> subCategorySolutions;
 
+    @Column(name = "ServiceProviderID")
+    private Long serviceProviderId;
 }

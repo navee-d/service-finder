@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID; // FIX: Imported UUID
 
 @Entity
 @Data
@@ -24,8 +25,9 @@ public class Provider {
     @Column(name = "ServiceProviderID")
     private Long providerId;
 
-    @Column(name = "UserId")
-    private Long userId;
+    // FIX: Changed to UUID and set column definition for MySQL
+    @Column(name = "UserId", columnDefinition = "binary(16)")
+    private UUID userId;
 
     @Column(name = "BusinessName", nullable = false, length = 100)
     @NotBlank(message = "Business name cannot be null")
@@ -59,5 +61,4 @@ public class Provider {
 
     @OneToMany(mappedBy = "provider")
     private List<Offer> offer = new ArrayList<>();
-
 }

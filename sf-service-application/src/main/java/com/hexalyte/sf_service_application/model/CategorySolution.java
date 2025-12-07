@@ -10,7 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "m2m_category_services")
+@Table(name = "category_services")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,7 +24,7 @@ public class CategorySolution {
     @MapsId("solutionId")
     @JoinColumn(name = "ServiceID", referencedColumnName = "ServiceID")
     @JsonIgnore
-    private Solution solution;
+    private Service service;
 
     @ManyToOne
     @MapsId("categoryId")

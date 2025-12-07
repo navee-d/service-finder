@@ -48,9 +48,12 @@ public class NotificationServiceImpl implements NotificationService {
                 helper.setSubject(message.getSubject());
                 helper.setText(new String(messageBody.getBytes()), messageBody.getContentType().equals(MediaType.TEXT_HTML_VALUE));
 
-                for (MultipartFile file : message.getFiles()) {
-                    if (!file.isEmpty())
-                        helper.addAttachment(file.getOriginalFilename(), new ByteArrayResource(file.getBytes()), file.getContentType());
+                // ⭐ FIX: Check if files is not null before iterating
+                if (message.getFiles() != null) {
+                    for (MultipartFile file : message.getFiles()) {
+                        if (!file.isEmpty())
+                            helper.addAttachment(file.getOriginalFilename(), new ByteArrayResource(file.getBytes()), file.getContentType());
+                    }
                 }
             } catch (MessagingException e) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid recipient, subject or content");
@@ -82,9 +85,12 @@ public class NotificationServiceImpl implements NotificationService {
                 helper.setSubject(message.getSubject());
                 helper.setText(new String(messageBody.getBytes()), messageBody.getContentType().equals(MediaType.TEXT_HTML_VALUE));
 
-                for (MultipartFile file : message.getFiles()) {
-                    if (!file.isEmpty())
-                        helper.addAttachment(file.getOriginalFilename(), new ByteArrayResource(file.getBytes()), file.getContentType());
+                // ⭐ FIX: Check if files is not null before iterating
+                if (message.getFiles() != null) {
+                    for (MultipartFile file : message.getFiles()) {
+                        if (!file.isEmpty())
+                            helper.addAttachment(file.getOriginalFilename(), new ByteArrayResource(file.getBytes()), file.getContentType());
+                    }
                 }
             } catch (MessagingException e) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid recipient, subject or content");

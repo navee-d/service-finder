@@ -1,19 +1,28 @@
-spring:
-  application:
-    name: sf-booking-application
-  jpa:
-    properties:
+  spring:
+    application:
+      name: sf-booking-application
+    jpa:
+      properties:
+        hibernate:
+          column_ordering_strategy: legacy
       hibernate:
-        column_ordering_strategy: legacy
-    hibernate:
-      ddl-auto: 'create'
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/sf_booking_application_db?createDatabaseIfNotExist=true
-  profiles:
-    active: development
-server:
-  error:
-    include-message: always
+        ddl-auto: 'update'
+        naming:
+          physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    datasource:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/sf_booking_application_db?createDatabaseIfNotExist=true
+      username: ${DB_USERNAME:root}
+      password: ${DB_PASSWORD:0827}
+    profiles:
+      active: ${SPRING_PROFILES_ACTIVE:development}
+  server:
+    error:
+      include-message: always
+    port: 8083
+  eureka:
+    client:
+      service-url:
+        defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+    instance:
+      prefer-ip-address: true

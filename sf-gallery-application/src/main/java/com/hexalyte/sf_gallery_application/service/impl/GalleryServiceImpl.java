@@ -9,6 +9,7 @@ import io.minio.messages.DeleteObject;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -232,7 +233,7 @@ public class GalleryServiceImpl implements GalleryService {
     }
 
     @Override
-    public void downloadImage(Long id) {
+    public ResponseEntity<byte[]> downloadImage(Long id) {
         if (!galleryRepository.existsById(id))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image with such ID is not found");
 
@@ -267,5 +268,6 @@ public class GalleryServiceImpl implements GalleryService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "XML server error: " + e.getMessage());
         }
 
+        return null;
     }
 }

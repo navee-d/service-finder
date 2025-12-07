@@ -9,5 +9,6 @@ import java.util.List;
 public interface CategorySolutionRepository extends JpaRepository<CategorySolution, CategorySolutionKey> {
     List<CategorySolution> findByCategory_CategoryId(int id);
 
-    List<CategorySolution> findBySolution_SolutionId(int id);
+
+    List<CategorySolution> findByService_SolutionId(int id);
 }

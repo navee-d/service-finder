@@ -9,52 +9,65 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("documents")
+@RequestMapping("/documents")
 public class DocumentsController {
 
-    private final DocumentService service;
+    private final DocumentService documentService;
 
-    public DocumentsController(DocumentService service) {
-        this.service = service;
+    public DocumentsController(DocumentService documentService) {
+        this.documentService = documentService;
     }
 
     @GetMapping
     public ResponseEntity<List<Document>> getDocuments() {
-        return new ResponseEntity<>(service.getDocuments(), HttpStatus.OK);
+        List<Document> documents = documentService.getDocuments();
+        return new ResponseEntity<>(documents, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Document> getDocumentById(@PathVariable Long id) {
-        return ResponseEntity.of(service.getDocumentById(id));
+        return documentService.getDocumentById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("download/{id}")
-    public void downloadDocument(@PathVariable Long id) {
-        service.downloadDocument(id);
+    @GetMapping("/download/{id}")
+    public ResponseEntity<byte[]> downloadDocument(@PathVariable Long id) {
+        return documentService.downloadDocument(id);
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Optional<List<Document>>> addDocuments(Document document, @RequestParam("files") MultipartFile[] files) {
-        return new ResponseEntity<>(service.addDocuments(document, files), HttpStatus.CREATED);
+    public ResponseEntity<List<Document>> addDocuments(
+            @RequestPart("document") Document document,
+            @RequestPart("files") MultipartFile[] files) {
+
+        List<Document> savedDocuments = documentService.addDocuments(document, files)
+                .orElse(List.of());
+        return new ResponseEntity<>(savedDocuments, HttpStatus.CREATED);
     }
 
     @PutMapping(path = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Document> updateDocument(Document document, @RequestParam("file") MultipartFile file, @PathVariable Long id) {
-        return ResponseEntity.of(service.updateDocument(document, file, id));
+    public ResponseEntity<Document> updateDocument(
+            @RequestPart("document") Document document,
+            @RequestPart("file") MultipartFile file,
+            @PathVariable Long id) {
+
+        return documentService.updateDocument(document, file, id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{serviceProviderId}/{id}")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Document deleted successfully")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteDocument(@PathVariable Long serviceProviderId, @PathVariable Long id) {
-        service.deleteDocument(serviceProviderId, id);
+        documentService.deleteDocument(serviceProviderId, id);
     }
 
     @DeleteMapping("/{serviceProviderId}")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Documents deleted successfully")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteDocumentsByServiceProviderId(@PathVariable Long serviceProviderId) {
-        service.deleteDocumentsByServiceProviderId(serviceProviderId);
+        documentService.deleteDocumentsByServiceProviderId(serviceProviderId);
     }
 }

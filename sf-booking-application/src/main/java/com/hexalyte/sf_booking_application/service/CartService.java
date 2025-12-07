@@ -9,9 +9,9 @@ import java.util.UUID;
 
 public interface CartService {
     List<Cart> getCarts();
-    Optional<Cart> getCartByUserId(UUID id);
+    Optional<Cart> getCartByUserId(UUID userId);
     Optional<Cart> addCart(Cart cart);
-    Optional<Cart> addCartItemToCart(Long id, CartItem cartItem);
-    Optional<Cart> updateCart(Long id, Cart cart);
-    void deleteCart(Long id);
+    Optional<Cart> addCartItemToCart(Long cartId, CartItem cartItem);
+    Optional<Cart> updateCart(Long cartId, Cart cart);
+    void deleteCart(Long cartId);
 }

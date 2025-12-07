@@ -19,6 +19,17 @@ public class UserManagementController {
         this.service = service;
     }
 
+    @PostMapping("/users")
+    public ResponseEntity<String> createUser(@RequestBody UserRepresentation userRepresentation) {
+        try {
+            service.createUser(userRepresentation);
+            return ResponseEntity.status(HttpStatus.CREATED).body("✅ User created successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("❌ Error creating user: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/users")
     public ResponseEntity<List<UserRepresentation>> getAllUsers() {
         return ResponseEntity.ofNullable(service.getAllUsers());
@@ -28,77 +39,4 @@ public class UserManagementController {
     public ResponseEntity<UserRepresentation> getUserById(@PathVariable String id) {
         return ResponseEntity.of(service.getUserById(id));
     }
-
-    @GetMapping("/users/groups/{id}")
-    public ResponseEntity<List<UserRepresentation>> getUsersInGroup(@PathVariable String id) {
-        return ResponseEntity.of(service.getUsersInGroup(id));
-    }
-
-    @GetMapping("/users/search")
-    public ResponseEntity<List<UserRepresentation>> getUsersBySearch(@RequestParam("q") String query,
-                                                                     @RequestParam(value = "pageNum", defaultValue = "1") int pageNumber,
-                                                                     @RequestParam(value = "resultsPerPage", defaultValue = "5") int resultsPerPage) {
-        return ResponseEntity.ofNullable(service.getUsersBySearch(query, pageNumber, resultsPerPage));
-    }
-
-    @PostMapping("users/{id}/realm-roles")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Assigned realm role to the user successfully")
-    public void assignUserRealmRole(@PathVariable String id, @RequestBody List<RoleRepresentation> roles) {
-        service.assignUserRealmRole(id, roles);
-    }
-
-    @PostMapping("users/{id}/client-roles")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Assigned client role to the user successfully")
-    public void assignUserClientRole(@PathVariable String id, @RequestBody List<RoleRepresentation> roles) {
-        service.assignUserClientRole(id, roles);
-    }
-
-    @DeleteMapping("users/{id}/realm-roles")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Unassigned realm role from the user successfully")
-    public void unassignUserRealmRole(@PathVariable String id, @RequestBody List<RoleRepresentation> roles) {
-        service.unassignUserRealmRole(id, roles);
-    }
-
-    @DeleteMapping("users/{id}/client-roles")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Unassigned client role from the user successfully")
-    public void unassignUserClientRole(@PathVariable String id, @RequestBody List<RoleRepresentation> roles) {
-        service.unassignUserClientRole(id, roles);
-    }
-
-    @PutMapping("users/{userId}/groups/{groupId}")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Assigned user to group successfully")
-    public void assignUserGroup(@PathVariable String userId, @PathVariable String groupId) {
-        service.assignUserGroup(userId, groupId);
-    }
-
-    @DeleteMapping("users/{userId}/groups/{groupId}")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Unassigned user from group successfully")
-    public void unassignUserGroup(@PathVariable String userId, @PathVariable String groupId) {
-        service.unassignUserGroup(userId, groupId);
-    }
-
-    @PostMapping("groups/{groupId}/realm-roles")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Assigned realm roles to group successfully")
-    public void assignRealmRolesToGroup(@PathVariable String groupId, @RequestBody List<RoleRepresentation> roles) {
-        service.assignRealmRolesToGroup(groupId, roles);
-    }
-
-    @PostMapping("groups/{groupId}/client-roles")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Assigned client roles to group successfully")
-    public void assignClientRolesToGroup(@PathVariable String groupId, @RequestBody List<RoleRepresentation> roles) {
-        service.assignClientRolesToGroup(groupId, roles);
-    }
-
-    @DeleteMapping("groups/{groupId}/realm-roles")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Unassigned realm roles from group successfully")
-    public void unassignRealmRolesToGroup(@PathVariable String groupId, @RequestBody List<RoleRepresentation> roles) {
-        service.unassignRealmRolesFromGroup(groupId, roles);
-    }
-
-    @DeleteMapping("groups/{groupId}/client-roles")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Unassigned realm roles from group successfully")
-    public void unassignClientRolesFromGroup(@PathVariable String groupId, @RequestBody List<RoleRepresentation> roles) {
-        service.unassignClientRolesFromGroup(groupId, roles);
-    }
-
 }

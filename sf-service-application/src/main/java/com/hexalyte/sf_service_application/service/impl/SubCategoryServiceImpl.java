@@ -7,12 +7,14 @@ import com.hexalyte.sf_service_application.repository.SubCategorySolutionReposit
 import com.hexalyte.sf_service_application.service.SubCategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // 🔧 1. IMPORT THIS
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class SubCategoryServiceImpl implements SubCategoryService {
 
     private final SubCategoryRepository subCategoryRepository;
@@ -24,16 +26,28 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<SubCategory> getSubCategories() {
-        return subCategoryRepository.findAll();
+        List<SubCategory> subCategories = subCategoryRepository.findAll();
+
+
+        subCategories.forEach(sub -> {
+            if (sub.getCategory() != null) {
+                sub.getCategory().getName();
+            }
+        });
+
+        return subCategories;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<SubCategory> getSubCategoryById(Integer id) {
         return subCategoryRepository.findById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<SubCategorySolution> getSubCategoryServices(Integer id) {
         List<SubCategorySolution> subCategorySolutions = subCategorySolutionRepository.findBySubCategory_SubCategoryId(id);
         if (subCategorySolutions.isEmpty()) return null;
@@ -42,7 +56,7 @@ public class SubCategoryServiceImpl implements SubCategoryService {
 
     @Override
     public Optional<SubCategory> addSubCategory(SubCategory subCategory) {
-        if (subCategory.getDescription().isBlank())
+        if (subCategory.getDescription() != null && subCategory.getDescription().isBlank())
             subCategory.setDescription(null);
 
         return Optional.of(subCategoryRepository.save(subCategory));
@@ -51,7 +65,7 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     @Override
     public Optional<SubCategory> updateSubCategory(SubCategory subCategory, Integer id) {
 
-        if (subCategory.getDescription().isBlank())
+        if (subCategory.getDescription() != null && subCategory.getDescription().isBlank())
             subCategory.setDescription(null);
 
         SubCategory updatingSubCategory = subCategoryRepository.findById(id).orElseThrow(

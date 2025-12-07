@@ -6,8 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(value = "service-interface",url = "http://localhost:8081/services")
+@FeignClient(value = "sf-service-application")
 public interface ServiceInterface {
-    @GetMapping("/{id}")
+    @GetMapping("/services/{id}")
     ResponseEntity<SolutionDTO> getServiceById(@PathVariable int id);
 }

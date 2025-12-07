@@ -1,6 +1,7 @@
 package com.hexalyte.sf_gallery_application.service;
 
 import com.hexalyte.sf_gallery_application.model.Document;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -19,5 +20,5 @@ public interface DocumentService {
 
     void deleteDocumentsByServiceProviderId(Long serviceProviderId);
 
-    void downloadDocument(Long id);
+    ResponseEntity<byte[]> downloadDocument(Long id);
 }

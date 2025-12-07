@@ -8,8 +8,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.UUID;
 
-@FeignClient(value = "user-interface",url = "http://localhost:8080/realm/users")
+@FeignClient(value = "sf-user-management-application")
 public interface UserInterface {
-    @GetMapping("{id}")
-    ResponseEntity<UserRepresentation> getUserById(@PathVariable UUID id);
+
+
+    @GetMapping("/realm/users/{id}")
+    ResponseEntity<UserRepresentation> getUserById(@PathVariable("id") UUID id);
 }

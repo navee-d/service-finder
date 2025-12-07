@@ -8,9 +8,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @SpringBootApplication
 @EnableConfigurationProperties(GalleryConfig.class)
 public class GalleryApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(GalleryApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(GalleryApplication.class, args);
+    }
 }

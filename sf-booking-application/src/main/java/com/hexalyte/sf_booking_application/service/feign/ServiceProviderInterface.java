@@ -6,8 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(value = "service-provider-interface",url="http://localhost:8085")
+@FeignClient(value = "sf-provider-application")
 public interface ServiceProviderInterface {
-    @GetMapping("provider/{id}")
+    @GetMapping("/provider/{id}")
     ResponseEntity<ServiceProviderDTO> getProviderByID(@PathVariable Long id);
 }

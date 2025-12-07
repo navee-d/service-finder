@@ -9,5 +9,4 @@ public class SfNotificationApplication {
     public static void main(String[] args) {
         SpringApplication.run(SfNotificationApplication.class, args);
     }
-
 }

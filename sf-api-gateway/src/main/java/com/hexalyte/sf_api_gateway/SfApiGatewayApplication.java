@@ -9,5 +9,4 @@ public class SfApiGatewayApplication {
     public static void main(String[] args) {
         SpringApplication.run(SfApiGatewayApplication.class, args);
     }
-
 }

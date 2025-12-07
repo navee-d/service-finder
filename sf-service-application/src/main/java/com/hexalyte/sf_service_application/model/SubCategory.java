@@ -2,19 +2,27 @@ package com.hexalyte.sf_service_application.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.hexalyte.sf_service_application.model.deserializer.CategoryConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "subcategories")
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "subCategoryId")
 public class SubCategory {
 
@@ -23,8 +31,10 @@ public class SubCategory {
     @Column(name = "SubcategoryID")
     private Integer subCategoryId;
 
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CategoryID", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JsonDeserialize(converter = CategoryConverter.class)
     private Category category;
 
@@ -36,18 +46,22 @@ public class SubCategory {
     @Column(name = "Description", columnDefinition = "TEXT")
     private String description;
 
-    @OneToMany(mappedBy = "subCategory")
-    @JsonIgnore
-    private List<Solution> solutions;
+    // Services relationship
+    @OneToMany(mappedBy = "subCategory", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore // prevent lazy-loading serialization issues
+    @Builder.Default
+    private List<Service> services = new ArrayList<>();
 
-    @OneToMany(mappedBy = "subCategory", cascade = CascadeType.REMOVE)
-    private List<SubCategorySolution> subCategorySolutions;
+    // SubCategorySolutions relationship
+    @OneToMany(mappedBy = "subCategory", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @Builder.Default
+    private List<SubCategorySolution> subCategorySolutions = new ArrayList<>();
 
     @PreRemove
     private void preRemove() {
-        solutions.forEach(
-                solution -> solution.setSubCategory(null)
-        );
+        if (services != null) {
+            services.forEach(service -> service.setSubCategory(null));
+        }
     }
-
 }

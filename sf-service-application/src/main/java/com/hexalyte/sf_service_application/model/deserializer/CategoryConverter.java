@@ -19,8 +19,7 @@ public class CategoryConverter extends StdConverter<Integer, Category> {
         Category category = repository.findByCategoryIdAndIsActive(value,true).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find category with such ID")
         );
-        if (category.getName().equals("None"))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Not a category");
+        // 🔧 FIX: Removed block that threw an error for "None" category
         return category;
     }
 }

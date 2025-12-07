@@ -1,3 +1,4 @@
+
 package com.hexalyte.sf_booking_application.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -27,14 +28,15 @@ public class Booking {
     @Column(name = "BookingID")
     private Long bookingId;
 
-    @Column(name = "UserID")
+    // ⭐ FIX: Explicitly define UUID column for MySQL
+    @Column(name = "UserID", columnDefinition = "binary(16)")
     private UUID userId;
 
     @Column(name = "ServiceProviderID")
     private Long serviceProviderId;
 
     @Column(name = "ServiceID")
-    private int serviceId;
+    private Long serviceId;
 
     @Column(name = "StartTime", nullable = false)
     @FutureOrPresent(message = "Start time cannot be a past date and time")
@@ -42,8 +44,8 @@ public class Booking {
     private LocalDateTime startTime;
 
     @Column(name = "EndTime", nullable = false)
-    @FutureOrPresent(message = "Start time cannot be a past date and time")
-    @NotNull(message = "Start time cannot be empty")
+    @FutureOrPresent(message = "End time cannot be a past date and time")
+    @NotNull(message = "End time cannot be empty")
     private LocalDateTime endTime;
 
     @Column(name = "Status", nullable = false)
@@ -56,6 +58,9 @@ public class Booking {
     @PositiveOrZero(message = "Total price cannot be a negative number")
     @NotNull(message = "Total price cannot be empty")
     private BigDecimal totalPrice;
+
+    @Column(name = "Rating")
+    private Double rating;
 
     @Column(name = "CreatedAt", columnDefinition = "TIMESTAMP", updatable = false)
     @ColumnDefault("CURRENT_TIMESTAMP")

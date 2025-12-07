@@ -6,6 +6,7 @@ import com.hexalyte.sf_booking_application.model.deserializer.DiscountDeserializ
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "cartitems")
 @Data
+@NoArgsConstructor
 public class CartItem {
 
     @Id
@@ -23,11 +25,11 @@ public class CartItem {
     @Column(name = "CartItemID")
     private Long cartItemId;
 
-    @Column(name = "ServiceProviderID")
+    @Column(name = "ServiceProviderID", nullable = false)
     private Long serviceProviderId;
 
-    @Column(name = "ServiceID")
-    private int serviceId;
+    @Column(name = "ServiceID", nullable = false)
+    private Long serviceId;  // changed from int to Long
 
     @Column(name = "Quantity", nullable = false)
     @ColumnDefault("1")
@@ -35,7 +37,7 @@ public class CartItem {
     private int quantity;
 
     @Column(name = "GrossPrice", nullable = false, columnDefinition = "DECIMAL(10,2)")
-    private BigDecimal grossPrice;
+    private BigDecimal grossPrice = BigDecimal.ZERO;
 
     @ManyToOne
     @JoinColumn(name = "DiscountID")
@@ -43,7 +45,7 @@ public class CartItem {
     private Discount discount;
 
     @Column(name = "NetPrice", nullable = false, columnDefinition = "DECIMAL(10,2)")
-    private BigDecimal netPrice;
+    private BigDecimal netPrice = BigDecimal.ZERO;
 
     @Column(name = "Description", columnDefinition = "TEXT")
     private String description;

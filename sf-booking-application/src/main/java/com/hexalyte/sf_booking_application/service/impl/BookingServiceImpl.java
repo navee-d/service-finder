@@ -1,17 +1,16 @@
+// src/main/java/com/hexalyte/sf_booking_application/service/impl/BookingServiceImpl.java
 package com.hexalyte.sf_booking_application.service.impl;
 
 import com.hexalyte.sf_booking_application.model.Booking;
-import com.hexalyte.sf_booking_application.model.feign.SolutionDTO;
+import com.hexalyte.sf_booking_application.model.BookingHistory;
 import com.hexalyte.sf_booking_application.repository.BookingRepository;
+import com.hexalyte.sf_booking_application.repository.BookingHistoryRepository;
 import com.hexalyte.sf_booking_application.service.BookingService;
-import com.hexalyte.sf_booking_application.service.feign.ServiceInterface;
-import com.hexalyte.sf_booking_application.service.feign.ServiceProviderInterface;
+// ⭐ THIS IS THE MISSING IMPORT ⭐
 import com.hexalyte.sf_booking_application.service.feign.UserInterface;
-import feign.FeignException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,124 +18,78 @@ import java.util.UUID;
 @Service
 public class BookingServiceImpl implements BookingService {
 
-    private final BookingRepository bookingRepository;
+    private final BookingRepository repository;
+    private final BookingHistoryRepository historyRepository;
     private final UserInterface userInterface;
-    private final ServiceInterface serviceInterface;
-    private final ServiceProviderInterface serviceProviderInterface;
 
-    public BookingServiceImpl(BookingRepository bookingRepository, UserInterface userInterface, ServiceInterface serviceInterface, ServiceProviderInterface serviceProviderInterface) {
-        this.bookingRepository = bookingRepository;
+    public BookingServiceImpl(BookingRepository repository,
+                              BookingHistoryRepository historyRepository,
+                              UserInterface userInterface) {
+        this.repository = repository;
+        this.historyRepository = historyRepository;
         this.userInterface = userInterface;
-        this.serviceInterface = serviceInterface;
-        this.serviceProviderInterface = serviceProviderInterface;
     }
 
     @Override
     public List<Booking> getAllBookings() {
-        List<Booking> bookings = bookingRepository.findAll();
-        if (bookings.isEmpty())
-            return null;
-        return bookings;
+        return repository.findAll();
     }
 
     @Override
     public Optional<Booking> getBookingById(Long id) {
-        Optional<Booking> booking = bookingRepository.findById(id);
-        if (booking.isEmpty())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find booking by this ID");
-        return booking;
+        return repository.findById(id);
     }
 
     @Override
-    public Optional<List<Booking>> getBookingByUserId(UUID id) {
-        try {
-            userInterface.getUserById(id);
-        } catch (FeignException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find user with such ID");
-        }
-
-        Optional<List<Booking>> bookings = bookingRepository.findByUserId(id);
-        if (bookings.get().isEmpty())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Cannot find any bookings under this user");
-        return bookings;
+    public List<Booking> getBookingByUserId(UUID userId) {
+        return repository.findByUserId(userId).orElse(Collections.emptyList());
     }
 
     @Override
-    public Optional<List<Booking>> getBookingByServiceProviderId(Long id) {
-        try {
-            serviceProviderInterface.getProviderByID(id);
-        } catch (FeignException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find service provider with such ID");
-        }
-
-        Optional<List<Booking>> bookings = bookingRepository.findByServiceProviderId(id);
-        if (bookings.get().isEmpty())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Cannot find any bookings under this user");
-        return bookings;
+    public List<Booking> getBookingByServiceProviderId(Long serviceProviderId) {
+        return repository.findByServiceProviderId(serviceProviderId).orElse(Collections.emptyList());
     }
 
     @Override
     public Optional<Booking> addBooking(Booking booking) {
+        // First, validate the user exists by calling the user-management-service
+        // This will throw an exception if the user is not found
+        userInterface.getUserById(booking.getUserId());
 
-        try {
-            userInterface.getUserById(booking.getUserId());
-        } catch (FeignException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find user with such ID");
-        }
-
-        try {
-            SolutionDTO service = serviceInterface.getServiceById(booking.getServiceId()).getBody();
-
-            if (!service.getServiceProviderId().equals(booking.getServiceProviderId()))
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This service provider does not provide " + service.getName());
-
-        } catch (FeignException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find service with such ID");
-        }
-
-        if (booking.getStartTime().isAfter(booking.getEndTime()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start time cannot be a time after end time");
-
-        return Optional.of(bookingRepository.save(booking));
+        // If the user exists, proceed to save the booking
+        return Optional.of(repository.save(booking));
     }
 
     @Override
     public Optional<Booking> updateBooking(Long id, Booking booking) {
-        Booking updatingBooking = bookingRepository.findById(id).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find booking by this ID")
-        );
+        // You could add user validation here too if needed
+        return repository.findById(id).map(existing -> {
+            booking.setBookingId(existing.getBookingId());
+            return repository.save(booking);
+        });
+    }
 
-        try {
-            userInterface.getUserById(booking.getUserId());
-        } catch (FeignException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find user with such ID");
-        }
+    @Override
+    public Optional<Booking> addRating(Long id, Double rating) {
+        return repository.findById(id).map(booking -> {
+            if (rating == null || rating < 0.0 || rating > 5.0) {
+                throw new IllegalArgumentException("Rating must be between 0 and 5");
+            }
+            booking.setRating(rating);
+            return repository.save(booking);
+        });
+    }
 
-        try {
-            SolutionDTO service = serviceInterface.getServiceById(booking.getServiceId()).getBody();
+    @Override
+    public boolean deleteBooking(Long id) {
+        return repository.findById(id).map(booking -> {
+            // 1. Create history record from the booking
+            BookingHistory bookingHistory = new BookingHistory(booking);
+            historyRepository.save(bookingHistory);
 
-            if (!service.getServiceProviderId().equals(booking.getServiceProviderId()))
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This service provider does not provide " + service.getName());
-
-        } catch (FeignException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find service with such ID");
-        }
-
-        if (booking.getStartTime().isAfter(booking.getEndTime()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start time cannot be a time after end time");
-
-        updatingBooking
-                .setServiceId(booking.getServiceId())
-                .setServiceProviderId(booking.getServiceProviderId())
-                .setUserId(booking.getUserId())
-                .setStatus(booking.getStatus())
-                .setTotalPrice(booking.getTotalPrice());
-
-        if (!updatingBooking.getStartTime().isEqual(booking.getStartTime()))
-            updatingBooking.setStartTime(booking.getStartTime());
-        if (!updatingBooking.getEndTime().equals(booking.getEndTime()))
-            updatingBooking.setEndTime(booking.getEndTime());
-
-        return Optional.of(bookingRepository.save(updatingBooking));
+            // 2. Delete the original booking
+            repository.delete(booking);
+            return true;
+        }).orElse(false);
     }
 }

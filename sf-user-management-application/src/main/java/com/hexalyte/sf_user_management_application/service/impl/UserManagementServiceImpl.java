@@ -1,8 +1,10 @@
 package com.hexalyte.sf_user_management_application.service.impl;
 
+import com.hexalyte.sf_user_management_application.model.User;
+import com.hexalyte.sf_user_management_application.repository.UserRepository;
 import com.hexalyte.sf_user_management_application.service.UserManagementService;
 import jakarta.annotation.PostConstruct;
-import jakarta.ws.rs.NotFoundException;
+import javax.ws.rs.NotFoundException;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -13,6 +15,9 @@ import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -26,7 +31,12 @@ import java.util.Optional;
 @Service
 public class UserManagementServiceImpl implements UserManagementService {
 
+    // ✅ FIXED: Inject the repository to save users locally
+    @Autowired
+    private UserRepository userRepository;
+
     private RealmResource realm;
+    private static final Logger log = LoggerFactory.getLogger(UserManagementServiceImpl.class);
 
     @Value("${keycloak.serverUrl}")
     private String serverUrl;
@@ -41,15 +51,21 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @PostConstruct
     private void init() {
-        Keycloak keycloak = KeycloakBuilder.builder()
-                .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
-                .serverUrl(serverUrl)
-                .realm(realmName)
-                .clientId(clientId)
-                .clientSecret(clientSecret)
-                .scope(OAuth2Constants.SCOPE_OPENID)
-                .build();
-        this.realm = keycloak.realm(realmName);
+        try {
+            log.info("Attempting to initialize Keycloak admin client...");
+            Keycloak keycloak = KeycloakBuilder.builder()
+                    .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
+                    .serverUrl(serverUrl)
+                    .realm(realmName)
+                    .clientId(clientId)
+                    .clientSecret(clientSecret)
+                    .scope(OAuth2Constants.SCOPE_OPENID)
+                    .build();
+            this.realm = keycloak.realm(realmName);
+            log.info("Keycloak admin client initialized successfully.");
+        } catch (Exception e) {
+            log.error("!!!!!!!! FAILED TO INITIALIZE KEYCLOAK ADMIN CLIENT !!!!!!!!", e);
+        }
     }
 
     @Override
@@ -65,7 +81,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         UserRepresentation user;
         try {
             user = realm.users().get(id).toRepresentation();
-        } catch (NotFoundException e) {
+        } catch (javax.ws.rs.NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No user is found with such ID");
         }
         return Optional.of(user);
@@ -76,7 +92,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         List<UserRepresentation> groupMembers;
         try {
             groupMembers = realm.groups().group(id).members();
-        } catch (NotFoundException e) {
+        } catch (javax.ws.rs.NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No group is found with such ID");
         }
         return Optional.of(groupMembers);
@@ -96,7 +112,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                 if (userRealmRoles.contains(addingRole))
                     throw new ResponseStatusException(HttpStatus.CONFLICT, "Realm role: " + role.getName() + " is already assigned to the user.");
                 addingRolesList.add(addingRole);
-            } catch (NotFoundException e) {
+            } catch (javax.ws.rs.NotFoundException e) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Realm role named " + role.getName() + " cannot be found.");
             }
         }
@@ -117,7 +133,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                 if (userClientRoles.contains(addingRole))
                     throw new ResponseStatusException(HttpStatus.CONFLICT, "Client role: " + role.getName() + " is already assigned to the user.");
                 addingRolesList.add(addingRole);
-            } catch (NotFoundException e) {
+            } catch (javax.ws.rs.NotFoundException e) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Client role named " + role.getName() + " cannot be found.");
             }
         }
@@ -138,7 +154,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                 if (!userRealmRoles.contains(addingRole))
                     throw new ResponseStatusException(HttpStatus.GONE, "Realm role: " + role.getName() + " is already unassigned from the user.");
                 removingRolesList.add(addingRole);
-            } catch (NotFoundException e) {
+            } catch (javax.ws.rs.NotFoundException e) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Realm role named " + role.getName() + " cannot be found.");
             }
         }
@@ -159,7 +175,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                 if (!userClientRoles.contains(addingRole))
                     throw new ResponseStatusException(HttpStatus.GONE, "Client role: " + role.getName() + " is already unassigned from the user.");
                 removingRolesList.add(addingRole);
-            } catch (NotFoundException e) {
+            } catch (javax.ws.rs.NotFoundException e) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Client role named " + role.getName() + " cannot be found.");
             }
         }
@@ -170,7 +186,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     public void assignUserGroup(String userId, String groupId) {
         try {
             realm.groups().group(groupId).toRepresentation();
-        } catch (NotFoundException e) {
+        } catch (javax.ws.rs.NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find group with such ID");
         }
 
@@ -181,7 +197,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                     throw new ResponseStatusException(HttpStatus.CONFLICT, "This group is already assigned to the user");
             }
             user.joinGroup(groupId);
-        } catch (NotFoundException e) {
+        } catch (javax.ws.rs.NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No user is found with such ID");
         }
     }
@@ -190,7 +206,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     public void unassignUserGroup(String userId, String groupId) {
         try {
             realm.groups().group(groupId).toRepresentation();
-        } catch (NotFoundException e) {
+        } catch (javax.ws.rs.NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find group with such ID");
         }
 
@@ -207,7 +223,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                 throw new ResponseStatusException(HttpStatus.GONE, "This group is already unassigned from the user " +
                         "or has not assigned to the user");
             user.leaveGroup(groupId);
-        } catch (NotFoundException e) {
+        } catch (javax.ws.rs.NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No user is found with such ID");
         }
     }
@@ -219,7 +235,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
         try {
             group.toRepresentation();
-        } catch (NotFoundException e) {
+        } catch (javax.ws.rs.NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find group with such ID");
         }
 
@@ -230,7 +246,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                 if (groupRealmRoles.contains(addingRole))
                     throw new ResponseStatusException(HttpStatus.CONFLICT, role.getName() + " realm role is already assigned to this group");
                 addingRoles.add(addingRole);
-            } catch (NotFoundException e) {
+            } catch (javax.ws.rs.NotFoundException e) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find realm role named " + role.getName());
             }
         }
@@ -245,7 +261,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
         try {
             group.toRepresentation();
-        } catch (NotFoundException e) {
+        } catch (javax.ws.rs.NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find group with such ID");
         }
 
@@ -256,7 +272,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                 if (groupClientRoles.contains(addingRole))
                     throw new ResponseStatusException(HttpStatus.CONFLICT, role.getName() + " client role is already assigned to this group");
                 addingRoles.add(addingRole);
-            } catch (NotFoundException e) {
+            } catch (javax.ws.rs.NotFoundException e) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find client role named " + role.getName());
             }
         }
@@ -271,7 +287,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
         try {
             group.toRepresentation();
-        } catch (NotFoundException e) {
+        } catch (javax.ws.rs.NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find group with such ID");
         }
 
@@ -283,7 +299,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                     throw new ResponseStatusException(HttpStatus.GONE, role.getName() + " realm role is " +
                             "already unassigned or has not assigned to this group");
                 removingRoles.add(removingRole);
-            } catch (NotFoundException e) {
+            } catch (javax.ws.rs.NotFoundException e) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find realm role named " + role.getName());
             }
         }
@@ -298,7 +314,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
         try {
             group.toRepresentation();
-        } catch (NotFoundException e) {
+        } catch (javax.ws.rs.NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find group with such ID");
         }
 
@@ -310,7 +326,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                     throw new ResponseStatusException(HttpStatus.CONFLICT, role.getName() + " client role is already unassigned " +
                             "or has no assigned to this group");
                 removingRoles.add(removingRole);
-            } catch (NotFoundException e) {
+            } catch (javax.ws.rs.NotFoundException e) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find client role named " + role.getName());
             }
         }
@@ -335,5 +351,19 @@ public class UserManagementServiceImpl implements UserManagementService {
         return userList;
     }
 
+    @Override
+    public void createUser(UserRepresentation userRepresentation) {
 
+        User newUser = new User();
+        newUser.setUsername(userRepresentation.getUsername());
+        newUser.setEmail(userRepresentation.getEmail());
+        newUser.setFirstName(userRepresentation.getFirstName());
+        newUser.setLastName(userRepresentation.getLastName());
+        newUser.setRole("Customer");
+
+
+        newUser.setPasswordHash("managed_by_keycloak");
+
+        userRepository.save(newUser);
+    }
 }

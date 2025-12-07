@@ -1,31 +1,86 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: sf-api-gateway
   cloud:
     gateway:
-      server:
-        webflux:
-          discovery:
-            locator:
-              enabled: true
-          routes:
-            - id: sf-user-management-application
-              uri: lb:http://SF-USER-MANAGEMENT-APPLICATION
-              predicates:
-                - Path=/users/**,/groups/**
-              filters:
-                - PrefixPath=/realm
-            - id: sf-service-application
-              uri: lb:http://SF-SERVICE-APPLICATION
-              predicates:
-                - Path=/services/**,/categories/**,/subcategories/**
-            - id: sf-serviceprovider-application
-              uri: lb:http://SF-SERVICEPROVIDER-APPLICATION
-              predicates:
-                - Path=/offers/**,/providers,/provider/**,/socialmedia/**
-            - id: sf-gallery-application
-              uri: lb:http://SF-GALLERY-APPLICATION
-              predicates:
-                - Path=/documents/**,/gallery/**
-server:
-  port: 8070
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        # User Management Route (Keycloak Wrapper)
+        - id: sf-user-management
+          uri: lb://sf-user-management-application
+          predicates:
+            - Path=/users/**,/groups/**
+          filters:
+            - PrefixPath=/realm
+
+        # Bookmarks Route
+        - id: sf-user-api
+          uri: lb://sf-user-management-application
+          predicates:
+            - Path=/api/v1/users/**
+
+        # Service Catalog + Loyalty + FAQs Route
+        - id: sf-service
+          uri: lb://sf-service-application
+          predicates:
+            # ⭐ This handles Services, Categories, Subcategories, Loyalty, and FAQs
+            - Path=/services/**,/categories/**,/subcategories/**,/api/v1/loyalty/**,/api/v1/faqs/**
+
+        # Provider Route
+        - id: sf-provider
+          uri: lb://sf-provider-application
+          predicates:
+            - Path=/offers/**,/providers/**,/provider/**,/socialmedia/**
+
+        # Gallery Route
+        - id: sf-gallery
+          uri: lb://sf-gallery-application
+          predicates:
+            - Path=/documents/**,/gallery/**
+
+        # Booking Route
+        - id: sf-booking
+          uri: lb://sf-booking-application
+          predicates:
+            - Path=/bookings/**,/carts/**,/booking-history/**
+
+        # Notification Route
+        - id: sf-notification
+          uri: lb://sf-notification-application
+          predicates:
+            - Path=/notifications/**
+
+        # Review Route
+        - id: sf-review
+          uri: lb://sf-review-application
+          predicates:
+            - Path=/api/reviews/**
+
+        # Payment Route
+        - id: sf-payment
+          uri: lb://sf-payment-application
+          predicates:
+            - Path=/api/payments/**
+
+        # FAQ Service Route (Optional, if you moved FAQs to their own service, keep this. 
+        # If FAQs are in Service App, the route above handles it. 
+        # Keeping it here allows the specific FAQ app to handle it if running)
+        - id: sf-faq
+          uri: lb://sf-faq-application
+          predicates:
+            - Path=/api/faqs/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true

@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: sf-user-management-application
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:development}
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/servicefinder_db?createDatabaseIfNotExist=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:0827}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${keycloak.serverUrl}/realms/${keycloak.realm}/protocol/openid-connect/certs
+
+server:
+  error:
+    include-message: always
+  port: 8085
+
+keycloak:
+  # FIX: Corrected spelling from KEYCLOK to KEYCLOAK
+  serverUrl: ${KEYCLOAK_SERVER_URL:https://auth.hexalyte.com/}
+  realm: ${KEYCLOAK_REALM:service-finder-cloud}
+  clientId: ${KEYCLOAK_CLIENT_ID:sf-user-management-application}
+  clientSecret: ${KEYCLOAK_CLIENT_SECRET:your_secret}
+  clientUuid: ${KEYCLOAK_CLIENT_UUID:your_uuid}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true

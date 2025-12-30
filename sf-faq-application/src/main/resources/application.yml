@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: sf-faq-application
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # Connects to the main database where the 'faqs' table is
+    url: jdbc:mysql://localhost:3306/servicefinder_db?createDatabaseIfNotExist=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:0827}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        column_ordering_strategy: legacy
+
+server:
+  port: 8089 # Unique port for FAQ service
+  error:
+    include-message: ALWAYS
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true

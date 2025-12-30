@@ -1,0 +1,15 @@
+[
+  {
+    "discountName": "Percentage Discount 10%",
+    "discountType": "Percentage",
+    "value": 10
+  },{
+    "discountName": "Price Deduction 500.50",
+    "discountType": "Price_deduction",
+    "value": 500.50
+  },{
+    "discountName": "Percentage Discount 25%",
+    "discountType": "Percentage",
+    "value": 25
+  }
+]

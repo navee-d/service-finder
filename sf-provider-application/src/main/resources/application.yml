@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: sf-provider-application
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        column_ordering_strategy: legacy
+    naming:
+      physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/sf_provider_application_db?createDatabaseIfNotExist=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:0827}
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:development}
+
+server:
+  error:
+    include-message: always
+  port: 8084
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true

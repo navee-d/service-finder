@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Category 1",
+    "description": "Description of category 1",
+    "isActive": true
+  },
+  {
+    "name": "Category 2",
+    "description": "Description of category 2",
+    "isActive": true
+  },
+  {
+    "name": "Category 3",
+    "description": "Description of category 3",
+    "isActive": true
+  },
+  {
+    "name": "Category 4",
+    "description": "Description of category 4",
+    "isActive": true
+  },
+  {
+    "name": "Category 5",
+    "description": "Description of category 5",
+    "isActive": true
+  }
+]

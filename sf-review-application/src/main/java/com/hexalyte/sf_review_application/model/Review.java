@@ -10,7 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
-import java.util.UUID; // Import UUID
+import java.util.UUID; // FIX: Import UUID
 
 @Data
 @NoArgsConstructor
@@ -24,14 +24,14 @@ public class Review {
     @Column(name = "ReviewID")
     private Integer reviewId;
 
-    // FIX: Change Integer to UUID to match the database change
+    // FIX: Changed to UUID and binary(16)
     @Column(name = "UserID", nullable = false, columnDefinition = "binary(16)")
     private UUID userId;
 
+    // FIX: Changed to Long to match Booking/Provider services
     @Column(name = "ServiceProviderID", nullable = false)
-    private Integer serviceProviderId;
+    private Long serviceProviderId;
 
-    // ... rest of the fields (Rating, Comment, timestamps) remain the same
     @Column(name = "Rating", nullable = false)
     @Min(value = 1, message = "Rating must be at least 1")
     @Max(value = 5, message = "Rating must be at most 5")

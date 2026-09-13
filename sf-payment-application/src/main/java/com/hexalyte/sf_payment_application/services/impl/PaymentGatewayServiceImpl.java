@@ -35,6 +35,18 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
     }
 
     @Override
+    public PaymentGateway updateGateway(Integer gatewayId, PaymentGateway gateway) {
+        PaymentGateway existingGateway = paymentGatewayRepository.findById(gatewayId)
+                .orElseThrow(() -> new RuntimeException("Gateway not found with id: " + gatewayId));
+        
+        existingGateway.setName(gateway.getName());
+        existingGateway.setDescription(gateway.getDescription());
+        existingGateway.setApiKey(gateway.getApiKey());
+        
+        return paymentGatewayRepository.save(existingGateway);
+    }
+
+    @Override
     public void deleteGateway(Integer gatewayId) {
         if (!paymentGatewayRepository.existsById(gatewayId)) {
             throw new RuntimeException("Gateway not found with id: " + gatewayId);

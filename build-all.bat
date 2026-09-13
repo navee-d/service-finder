@@ -22,13 +22,15 @@ for %%s in (sf-discovery-server sf-api-gateway sf-user-management-application sf
 
     :: Stop if the build failed
     if %ERRORLEVEL% NEQ 0 (
-        echo [ERROR] Build failed for %%s. Fix errors before running Docker.
+        echo [ERROR] Build failed for %%s.
+        echo Fix errors before running Docker.
         pause
         exit /b %ERRORLEVEL%
     )
 )
 
 echo ========================================================
-echo       All Builds Successful! Ready for Docker.
+echo       All Builds Successful!
+echo Ready for Docker.
 echo ========================================================
 pause

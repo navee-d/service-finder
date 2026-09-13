@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("services")
+@RequestMapping("solutions")
 public class SolutionController {
     private final SolutionService service;
 

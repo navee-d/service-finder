@@ -15,7 +15,8 @@ public interface SubCategoryService {
 
     Optional<SubCategory> addSubCategory(SubCategory subCategory);
 
-    Optional<SubCategory> updateSubCategory(SubCategory subCategory, Integer id);
+    // FIX: Ensure Integer id is the first argument
+    Optional<SubCategory> updateSubCategory(Integer id, SubCategory subCategory);
 
     void deleteSubCategory(Integer id);
 }

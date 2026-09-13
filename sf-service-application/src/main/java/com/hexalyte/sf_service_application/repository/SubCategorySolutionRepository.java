@@ -9,9 +9,9 @@ import java.util.List;
 
 @Repository
 public interface SubCategorySolutionRepository extends JpaRepository<SubCategorySolution, SubCategorySolutionKey> {
+    // Finds entries by the 'solutionId' field inside the embedded 'id'
+    List<SubCategorySolution> findById_SolutionId(Integer solutionId);
 
-
-    List<SubCategorySolution> findByService_SolutionId(int id);
-
-    List<SubCategorySolution> findBySubCategory_SubCategoryId(int subCategorySubCategoryId);
+    // Finds entries by the 'subCategoryId' field inside the embedded 'id'
+    List<SubCategorySolution> findById_SubCategoryId(Integer subCategoryId);
 }

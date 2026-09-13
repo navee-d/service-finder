@@ -42,8 +42,8 @@ public class SubCategoryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SubCategory> updateSubCategory(@RequestBody @Valid SubCategory subCategory, @PathVariable Integer id) {
-        return ResponseEntity.of(service.updateSubCategory(subCategory, id));
+    public ResponseEntity<SubCategory> updateSubCategory(@PathVariable Integer id, @RequestBody @Valid SubCategory subCategory) {
+        return ResponseEntity.of(service.updateSubCategory(id, subCategory));
     }
 
     @DeleteMapping("/{id}")

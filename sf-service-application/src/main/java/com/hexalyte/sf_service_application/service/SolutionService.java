@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SolutionService {
-
     List<Solution> getServices();
 
     Optional<Solution> getServiceById(Integer id);
@@ -22,5 +21,4 @@ public interface SolutionService {
     Optional<Solution> updateService(Integer id, Solution solution);
 
     void deleteService(Integer id);
-
 }

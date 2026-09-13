@@ -1,90 +1,45 @@
 package com.hexalyte.sf_service_application.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.hexalyte.sf_service_application.model.deserializer.CategoryConverter;
-import com.hexalyte.sf_service_application.model.deserializer.SubCategoryConverter;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.experimental.Accessors;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.validator.constraints.Length;
-
+import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "services")
 @Data
-@Accessors(chain = true)
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Solution {
 
     @Id
-    @Column(name = "ServiceID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer solutionId;
 
-    @Column(name = "Name", length = 100, nullable = false)
-    @NotBlank(message = "Service name cannot be null")
-    @Length(max = 100, message = "Service name cannot exceed 100 characters")
+    private Integer serviceProviderId;
     private String name;
+    private String description;
+    private BigDecimal price;
+    private String estimatedTime;
+    private String reminderTime;
+    private Boolean isAvailable;
+    private Boolean isActive;
 
     @ManyToOne
-    @JoinColumn(name = "CategoryID", nullable = false)
-    @JsonDeserialize(converter = CategoryConverter.class)
+    @JoinColumn(name = "category_id")
     private Category category;
 
     @ManyToOne
-    @JoinColumn(name = "SubcategoryID")
-    @JsonDeserialize(converter = SubCategoryConverter.class)
+    @JoinColumn(name = "sub_category_id")
     private SubCategory subCategory;
 
-    @Column(name = "Description", columnDefinition = "TEXT")
-    private String description;
+    // --- Added missing lists ---
+    @OneToMany(mappedBy = "solution", cascade = CascadeType.ALL)
+    private List<CategorySolution> categorySolutions;
 
-    @Column(name = "Price", nullable = false, columnDefinition = "DECIMAL(10,2)")
-    @NotNull(message = "Price cannot be null")
-    private BigDecimal price;
-
-    @Column(name = "EstimatedTime")
-    @Positive(message = "Estimated time must be a positive value")
-    private Integer estimatedTime;
-
-    @Column(name = "ReminderTime", columnDefinition = "TIME")
-    private LocalTime reminderTime;
-
-    @Column(name = "CreatedAt", columnDefinition = "TIMESTAMP", updatable = false)
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @CreationTimestamp
-    @PastOrPresent(message = "Created at date cannot be a future date")
-    private LocalDateTime createdAt;
-
-    @Column(name = "UpdatedAt", columnDefinition = "TIMESTAMP")
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @UpdateTimestamp
-    @PastOrPresent(message = "Updated at date cannot be a future date")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "IsAvailable")
-    private Boolean isAvailable;
-
-    @Column(name = "IsActive")
-    private Boolean isActive;
-
-    @OneToMany(mappedBy = "solution", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private List<CategorySolution> categorySolutions = new ArrayList<>();
-
-    @OneToMany(mappedBy = "solution", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @OneToMany(mappedBy = "solution", cascade = CascadeType.ALL)
     private List<SubCategorySolution> subCategorySolutions;
-
-    @Column(name = "ServiceProviderID")
-    private Long serviceProviderId;
 }

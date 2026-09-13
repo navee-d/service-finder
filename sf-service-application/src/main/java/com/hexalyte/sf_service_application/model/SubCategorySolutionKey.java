@@ -6,33 +6,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.io.Serializable;
-import java.util.Objects;
 
 @Embeddable
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
 public class SubCategorySolutionKey implements Serializable {
-
-    @Column(name = "SubCategoryID")
+    @Column(name = "sub_category_id")
     private Integer subCategoryId;
 
-    @Column(name = "ServiceID")
+    @Column(name = "solution_id")
     private Integer solutionId;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SubCategorySolutionKey that)) return false;
-        return Objects.equals(subCategoryId, that.subCategoryId) &&
-                Objects.equals(solutionId, that.solutionId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(subCategoryId, solutionId);
-    }
 }

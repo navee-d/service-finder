@@ -8,14 +8,14 @@ import com.hexalyte.sf_service_application.repository.SubCategoryRepository;
 import com.hexalyte.sf_service_application.service.CategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // 🔧 1. IMPORT THIS
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional // 🔧 2. ADD THIS ANNOTATION
+@Transactional
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
@@ -31,13 +31,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Transactional(readOnly = true) // Mark read-only methods
+    @Transactional(readOnly = true)
     public List<Category> getCategories() {
         return categoryRepository.findAllByIsActive(true);
     }
 
     @Override
-    @Transactional(readOnly = true) // Mark read-only methods
+    @Transactional(readOnly = true)
     public Optional<Category> getCategoryById(Integer id) {
         Optional<Category> category = categoryRepository.findByCategoryIdAndIsActive(id, true);
         if (category.isEmpty())
@@ -46,9 +46,10 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Transactional(readOnly = true) // Mark read-only methods
+    @Transactional(readOnly = true)
     public List<CategorySolution> getCategoryServices(Integer id) {
-        List<CategorySolution> categorySolutions = categorySolutionRepository.findByCategory_CategoryId(id);
+        // FIX: Use findById_CategoryId
+        List<CategorySolution> categorySolutions = categorySolutionRepository.findById_CategoryId(id);
         if (categorySolutions.isEmpty()) return null;
         return categorySolutions;
     }
@@ -72,10 +73,12 @@ public class CategoryServiceImpl implements CategoryService {
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category with such ID cannot be found.")
         );
 
-        if (categoryRepository.getReferenceById(id).getName().equals("None"))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not a category");
+        if (updatingCategory.getName() != null && updatingCategory.getName().equals("None"))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot update 'None' category");
 
-        updatingCategory.setName(category.getName());
+        if (category.getName() != null && !category.getName().isBlank()) {
+            updatingCategory.setName(category.getName());
+        }
         updatingCategory.setDescription(category.getDescription());
 
         return Optional.of(categoryRepository.save(updatingCategory));
@@ -98,7 +101,8 @@ public class CategoryServiceImpl implements CategoryService {
                 () -> categoryRepository.save(Category.builder().name("None").isActive(true).build())
         );
 
-        List<CategorySolution> categorySolutions = categorySolutionRepository.findByCategory_CategoryId(id);
+        // FIX: Use findById_CategoryId
+        List<CategorySolution> categorySolutions = categorySolutionRepository.findById_CategoryId(id);
         for (CategorySolution solution : categorySolutions) {
             solution.setCategory(none);
         }
@@ -106,7 +110,5 @@ public class CategoryServiceImpl implements CategoryService {
 
         // Delete related subcategories
         subCategoryRepository.deleteAll(category.getSubCategories());
-
-        // categorySolutionRepository.deleteAll(category.getCategorySolutions()); // This was the bug you fixed
     }
 }

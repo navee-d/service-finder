@@ -8,5 +8,6 @@ public interface PaymentGatewayService {
     PaymentGateway getGatewayById(Integer gatewayId);
     PaymentGateway getGatewayByName(String name);
     List<PaymentGateway> getAllGateways();
+    PaymentGateway updateGateway(Integer gatewayId, PaymentGateway gateway);
     void deleteGateway(Integer gatewayId);
 }

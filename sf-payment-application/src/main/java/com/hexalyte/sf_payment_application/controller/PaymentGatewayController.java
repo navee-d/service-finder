@@ -33,6 +33,12 @@ public class PaymentGatewayController {
         return ResponseEntity.ok(gateways);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<PaymentGateway> updateGateway(@PathVariable Integer id, @RequestBody PaymentGateway gateway) {
+        PaymentGateway updatedGateway = paymentGatewayService.updateGateway(id, gateway);
+        return ResponseEntity.ok(updatedGateway);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGateway(@PathVariable Integer id) {
         paymentGatewayService.deleteGateway(id);

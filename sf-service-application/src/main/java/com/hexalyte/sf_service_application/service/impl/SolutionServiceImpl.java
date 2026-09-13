@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class SolutionServiceImpl implements SolutionService {
 
     private final SolutionRepository solutionRepository;
@@ -35,8 +36,7 @@ public class SolutionServiceImpl implements SolutionService {
     @Override
     public List<Solution> getServices() {
         List<Solution> services = solutionRepository.findAll();
-        if (services.isEmpty())
-            return null;
+        if (services.isEmpty()) return null;
         return services;
     }
 
@@ -50,14 +50,16 @@ public class SolutionServiceImpl implements SolutionService {
 
     @Override
     public List<CategorySolution> getServiceCategories(Integer id) {
-        List<CategorySolution> categorySolutions = categorySolutionRepository.findBySolution_SolutionId(id);
+        // FIX: Use findById_SolutionId
+        List<CategorySolution> categorySolutions = categorySolutionRepository.findById_SolutionId(id);
         if (categorySolutions.isEmpty()) return null;
         return categorySolutions;
     }
 
     @Override
     public List<SubCategorySolution> getServiceSubCategories(Integer id) {
-        List<SubCategorySolution> subCategorySolutions = subCategorySolutionRepository.findBySolution_SolutionId(id);
+        // FIX: Use findById_SolutionId
+        List<SubCategorySolution> subCategorySolutions = subCategorySolutionRepository.findById_SolutionId(id);
         if (subCategorySolutions.isEmpty()) return null;
         return subCategorySolutions;
     }
@@ -71,36 +73,35 @@ public class SolutionServiceImpl implements SolutionService {
                     "No such subcategory found under " + solution.getCategory().getName() + " category."
             );
 
-        solution.setCategorySolutions(List.of(
-                CategorySolution.builder()
-                        .id(
-                                CategorySolutionKey.builder()
-                                        .categoryId(solution.getCategory().getCategoryId())
-                                        .build()
-                        )
-                        .solution(solution)
-                        .category(solution.getCategory())
-                        .build()
-        ));
+        // Save solution first to get ID
+        Solution savedSolution = solutionRepository.save(solution);
 
-        solution.setSubCategorySolutions(List.of(
-                SubCategorySolution.builder()
-                        .id(
-                                SubCategorySolutionKey.builder()
-                                        .subCategoryId(solution.getSubCategory().getSubCategoryId())
-                                        .build()
-                        )
-                        .solution(solution)
-                        .subCategory(solution.getSubCategory())
-                        .build()
-        ));
-        return Optional.of(solutionRepository.save(solution));
+        CategorySolution categorySolution = CategorySolution.builder()
+                .id(CategorySolutionKey.builder()
+                        .categoryId(savedSolution.getCategory().getCategoryId())
+                        .solutionId(savedSolution.getSolutionId())
+                        .build())
+                .solution(savedSolution)
+                .category(savedSolution.getCategory())
+                .build();
+
+        SubCategorySolution subCategorySolution = SubCategorySolution.builder()
+                .id(SubCategorySolutionKey.builder()
+                        .subCategoryId(savedSolution.getSubCategory().getSubCategoryId())
+                        .solutionId(savedSolution.getSolutionId())
+                        .build())
+                .solution(savedSolution)
+                .subCategory(savedSolution.getSubCategory())
+                .build();
+
+        categorySolutionRepository.save(categorySolution);
+        subCategorySolutionRepository.save(subCategorySolution);
+
+        return Optional.of(savedSolution);
     }
 
     @Override
-    @Transactional
     public Optional<Solution> updateService(Integer id, Solution solution) {
-
         if (solution.getDescription().isBlank())
             solution.setDescription(null);
 
@@ -115,57 +116,53 @@ public class SolutionServiceImpl implements SolutionService {
                     "No such subcategory found under " + solution.getCategory().getName() + " category."
             );
 
-        updatingSolution
-                .setServiceProviderId(solution.getServiceProviderId())
-                .setName(solution.getName())
-                .setCategory(solution.getCategory())
-                .setSubCategory(solution.getSubCategory())
-                .setDescription(solution.getDescription())
-                .setPrice(solution.getPrice())
-                .setEstimatedTime(solution.getEstimatedTime())
-                .setReminderTime(solution.getReminderTime())
-                .setIsAvailable(solution.getIsAvailable())
-                .setIsActive(solution.getIsActive());
+        // FIX: Unchained setters to avoid 'void cannot be dereferenced' error
+        updatingSolution.setServiceProviderId(solution.getServiceProviderId());
+        updatingSolution.setName(solution.getName());
+        updatingSolution.setCategory(solution.getCategory());
+        updatingSolution.setSubCategory(solution.getSubCategory());
+        updatingSolution.setDescription(solution.getDescription());
+        updatingSolution.setPrice(solution.getPrice());
+        updatingSolution.setEstimatedTime(solution.getEstimatedTime());
+        updatingSolution.setReminderTime(solution.getReminderTime());
+        updatingSolution.setIsAvailable(solution.getIsAvailable());
+        updatingSolution.setIsActive(solution.getIsActive());
 
-        categorySolutionRepository.deleteAll(categorySolutionRepository.findBySolution_SolutionId(id));
-        subCategorySolutionRepository.deleteAll(subCategorySolutionRepository.findBySolution_SolutionId(id));
+        // FIX: Use findById_SolutionId
+        categorySolutionRepository.deleteAll(categorySolutionRepository.findById_SolutionId(id));
+        subCategorySolutionRepository.deleteAll(subCategorySolutionRepository.findById_SolutionId(id));
 
         solutionRepository.flush();
 
-        categorySolutionRepository.save(
-                CategorySolution.builder()
-                        .id(
-                                CategorySolutionKey.builder()
-                                        .categoryId(updatingSolution.getCategory().getCategoryId())
-                                        .build()
-                        )
-                        .solution(updatingSolution)
-                        .category(updatingSolution.getCategory())
-                        .build()
-        );
+        CategorySolution categorySolution = CategorySolution.builder()
+                .id(CategorySolutionKey.builder()
+                        .categoryId(updatingSolution.getCategory().getCategoryId())
+                        .solutionId(updatingSolution.getSolutionId())
+                        .build())
+                .solution(updatingSolution)
+                .category(updatingSolution.getCategory())
+                .build();
 
-        subCategorySolutionRepository.save(
-                SubCategorySolution.builder()
-                        .id(
-                                SubCategorySolutionKey.builder()
-                                        .subCategoryId(updatingSolution.getSubCategory().getSubCategoryId())
-                                        .build()
-                        )
-                        .solution(updatingSolution)
-                        .subCategory(updatingSolution.getSubCategory())
-                        .build()
-        );
+        SubCategorySolution subCategorySolution = SubCategorySolution.builder()
+                .id(SubCategorySolutionKey.builder()
+                        .subCategoryId(updatingSolution.getSubCategory().getSubCategoryId())
+                        .solutionId(updatingSolution.getSolutionId())
+                        .build())
+                .solution(updatingSolution)
+                .subCategory(updatingSolution.getSubCategory())
+                .build();
+
+        categorySolutionRepository.save(categorySolution);
+        subCategorySolutionRepository.save(subCategorySolution);
 
         return Optional.of(updatingSolution);
     }
 
     @Override
     public void deleteService(Integer id) {
-        solutionRepository.delete(
-                solutionRepository.findById(id).orElseThrow(
-                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find service with such ID")
-                )
+        Solution solution = solutionRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find service with such ID")
         );
+        solutionRepository.delete(solution);
     }
-
 }

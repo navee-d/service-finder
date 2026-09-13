@@ -7,8 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.5</version>
-        <relativePath/>
+        <version>3.2.5</version> <relativePath/>
     </parent>
 
     <groupId>com.hexalyte</groupId>
@@ -18,8 +17,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <spring-cloud.version>2024.0.1</spring-cloud.version>
-    </properties>
+        <spring-cloud.version>2023.0.1</spring-cloud.version> </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -63,8 +61,7 @@
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-admin-client</artifactId>
-            <version>26.0.5</version>
-        </dependency>
+            <version>23.0.0</version> </dependency>
 
         <dependency>
             <groupId>javax.ws.rs</groupId>

@@ -1,8 +1,5 @@
 package com.hexalyte.sf_service_application.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,26 +7,22 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "category_services")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class CategorySolution {
+
     @EmbeddedId
     private CategorySolutionKey id;
 
     @ManyToOne
-    @MapsId("solutionId")
-    @JoinColumn(name = "ServiceID", referencedColumnName = "ServiceID")
-    @JsonIgnore
-    private Service service;
-
-    @ManyToOne
-    @MapsId("categoryId")
-    @JoinColumn(name = "CategoryID", referencedColumnName = "CategoryID")
-    @JsonIgnore
+    @MapsId("categoryId") // Maps the categoryId from the key to this entity
+    @JoinColumn(name = "category_id")
     private Category category;
 
+    @ManyToOne
+    @MapsId("solutionId") // Maps the solutionId from the key to this entity
+    @JoinColumn(name = "solution_id")
+    private Solution solution;
 }

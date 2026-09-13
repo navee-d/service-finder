@@ -2,7 +2,7 @@ package com.hexalyte.sf_review_application.service;
 
 import com.hexalyte.sf_review_application.model.Review;
 import java.util.List;
-import java.util.UUID; // Import UUID
+import java.util.UUID; // FIX: Import UUID
 
 public interface ReviewService {
 
@@ -10,12 +10,14 @@ public interface ReviewService {
 
     Review getReviewById(Integer reviewId);
 
-    List<Review> getReviewsByServiceProvider(Integer serviceProviderId);
+    // FIX: Changed to Long
+    List<Review> getReviewsByServiceProvider(Long serviceProviderId);
 
-    // FIX: Change Integer to UUID
+    // FIX: Changed to UUID
     List<Review> getReviewsByUser(UUID userId);
 
     void deleteReview(Integer reviewId);
 
-    Double getAverageRating(Integer serviceProviderId);
+    // FIX: Changed to Long
+    Double getAverageRating(Long serviceProviderId);
 }

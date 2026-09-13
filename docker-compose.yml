@@ -6,18 +6,14 @@ services:
     image: mysql:8.0
     container_name: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-0827}
+      MYSQL_ROOT_PASSWORD: "0827"
       MYSQL_DATABASE: servicefinder_db
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    restart: unless-stopped
 
   minio:
     image: minio/minio:latest
@@ -26,20 +22,14 @@ services:
       - "9000:9000"
       - "9001:9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    restart: unless-stopped
 
-  # --- Microservices ---
-
-  # 1. Discovery Server
+  # --- Discovery Server ---
   discovery-server:
     build:
       context: .
@@ -50,9 +40,10 @@ services:
     ports:
       - "8761:8761"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
+      SPRING_PROFILES_ACTIVE: docker
+    restart: unless-stopped
 
-  # 2. API Gateway
+  # --- API Gateway ---
   api-gateway:
     build:
       context: .
@@ -63,12 +54,13 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
     depends_on:
       - discovery-server
+    restart: unless-stopped
 
-  # 3. User Management
+  # --- User Management ---
   user-service:
     build:
       context: .
@@ -77,22 +69,17 @@ services:
         MODULE_NAME: sf-user-management-application
     container_name: user-service
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/servicefinder_db?createDatabaseIfNotExist=true
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
-      # Keycloak Configuration
-      - KEYCLOAK_SERVER_URL=${KEYCLOAK_SERVER_URL}
-      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
-      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
-      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
-      - KEYCLOAK_CLIENT_UUID=${KEYCLOAK_CLIENT_UUID}
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/servicefinder_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: "0827"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
     depends_on:
-      mysql:
-        condition: service_healthy
-      discovery-server:
-        condition: service_started
+      - mysql
+      - discovery-server
+    restart: unless-stopped
 
-  # 4. Service Catalog
+  # --- Service Application ---
   service-app:
     build:
       context: .
@@ -101,16 +88,17 @@ services:
         MODULE_NAME: sf-service-application
     container_name: service-app
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/servicefinder_db?createDatabaseIfNotExist=true
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/servicefinder_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: "0827"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
     depends_on:
-      mysql:
-        condition: service_healthy
-      discovery-server:
-        condition: service_started
+      - mysql
+      - discovery-server
+    restart: unless-stopped
 
-  # 5. Provider Service
+  # --- Provider Service ---
   provider-service:
     build:
       context: .
@@ -119,39 +107,17 @@ services:
         MODULE_NAME: sf-provider-application
     container_name: provider-service
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/servicefinder_db?createDatabaseIfNotExist=true
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/servicefinder_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: "0827"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
     depends_on:
-      mysql:
-        condition: service_healthy
-      discovery-server:
-        condition: service_started
+      - mysql
+      - discovery-server
+    restart: unless-stopped
 
-  # 6. Gallery Service
-  gallery-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        MODULE_NAME: sf-gallery-application
-    container_name: gallery-service
-    ports:
-      - "8082:8082"
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/servicefinder_db?createDatabaseIfNotExist=true
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
-      - MINIO_ENDPOINT=http://minio:9000
-    depends_on:
-      mysql:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-      discovery-server:
-        condition: service_started
-
-  # 7. Booking Service
+  # --- Booking Service ---
   booking-service:
     build:
       context: .
@@ -160,38 +126,37 @@ services:
         MODULE_NAME: sf-booking-application
     container_name: booking-service
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/servicefinder_db?createDatabaseIfNotExist=true
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/servicefinder_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: "0827"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
     depends_on:
-      mysql:
-        condition: service_healthy
-      discovery-server:
-        condition: service_started
+      - mysql
+      - discovery-server
+    restart: unless-stopped
 
-  # 8. Notification Service
-  notification-service:
+  # --- Gallery Service ---a
+  gallery-service:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        MODULE_NAME: sf-notification-application
-    container_name: notification-service
+        MODULE_NAME: sf-gallery-application
+    container_name: gallery-service
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/servicefinder_db?createDatabaseIfNotExist=true
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
-      - MAIL_HOST=${MAIL_HOST}
-      - MAIL_PORT=${MAIL_PORT}
-      - MAIL_USERNAME=${MAIL_USERNAME}
-      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/servicefinder_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: "0827"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
     depends_on:
-      mysql:
-        condition: service_healthy
-      discovery-server:
-        condition: service_started
+      - mysql
+      - minio
+      - discovery-server
+    restart: unless-stopped
 
-  # 9. Review Service
+  # --- Review Service ---
   review-service:
     build:
       context: .
@@ -200,16 +165,17 @@ services:
         MODULE_NAME: sf-review-application
     container_name: review-service
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/servicefinder_db?createDatabaseIfNotExist=true
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/servicefinder_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: "0827"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
     depends_on:
-      mysql:
-        condition: service_healthy
-      discovery-server:
-        condition: service_started
+      - mysql
+      - discovery-server
+    restart: unless-stopped
 
-  # 10. Payment Service
+  # --- Payment Service ---
   payment-service:
     build:
       context: .
@@ -217,19 +183,37 @@ services:
       args:
         MODULE_NAME: sf-payment-application
     container_name: payment-service
-    ports:
-      - "8088:8088"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/sf_payments_application?createDatabaseIfNotExist=true
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/servicefinder_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: "0827"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
     depends_on:
-      mysql:
-        condition: service_healthy
-      discovery-server:
-        condition: service_started
+      - mysql
+      - discovery-server
+    restart: unless-stopped
 
-  # 11. FAQ Service
+  # --- Notification Service ---
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE_NAME: sf-notification-application
+    container_name: notification-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/servicefinder_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: "0827"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+    depends_on:
+      - mysql
+      - discovery-server
+    restart: unless-stopped
+
+  # --- FAQ Service ---
   faq-service:
     build:
       context: .
@@ -238,15 +222,17 @@ services:
         MODULE_NAME: sf-faq-application
     container_name: faq-service
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/servicefinder_db?createDatabaseIfNotExist=true
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/servicefinder_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: "0827"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
     depends_on:
-      mysql:
-        condition: service_healthy
-      discovery-server:
-        condition: service_started
+      - mysql
+      - discovery-server
+    restart: unless-stopped
 
 volumes:
   mysql_data:
   minio_data:
+  maven_repo:

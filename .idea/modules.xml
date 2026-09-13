@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/hexalyte-servicefinder-parent.iml" filepath="$PROJECT_DIR$/.idea/hexalyte-servicefinder-parent.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sf-service-application/sf-service-application.iml" filepath="$PROJECT_DIR$/sf-service-application/sf-service-application.iml" />
     </modules>
   </component>
 </project>

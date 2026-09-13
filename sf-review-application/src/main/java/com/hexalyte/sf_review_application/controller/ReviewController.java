@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID; // Import UUID
+import java.util.UUID; // FIX: Import UUID
 
 @RestController
 @RequestMapping("/api/reviews")
@@ -28,19 +28,21 @@ public class ReviewController {
         return ResponseEntity.ok(review);
     }
 
+    // FIX: Changed to Long
     @GetMapping("/provider/{providerId}")
-    public ResponseEntity<List<Review>> getReviewsByProvider(@PathVariable Integer providerId) {
+    public ResponseEntity<List<Review>> getReviewsByProvider(@PathVariable Long providerId) {
         List<Review> reviews = reviewService.getReviewsByServiceProvider(providerId);
         return ResponseEntity.ok(reviews);
     }
 
+    // FIX: Changed to Long
     @GetMapping("/provider/{providerId}/average")
-    public ResponseEntity<Double> getAverageRating(@PathVariable Integer providerId) {
+    public ResponseEntity<Double> getAverageRating(@PathVariable Long providerId) {
         Double average = reviewService.getAverageRating(providerId);
         return ResponseEntity.ok(average);
     }
 
-    // FIX: Change PathVariable type to UUID
+    // FIX: Changed to UUID
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Review>> getReviewsByUser(@PathVariable UUID userId) {
         List<Review> reviews = reviewService.getReviewsByUser(userId);

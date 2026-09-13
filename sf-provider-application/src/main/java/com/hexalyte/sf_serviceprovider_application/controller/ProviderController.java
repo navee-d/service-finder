@@ -28,8 +28,18 @@ public class ProviderController {
         return ResponseEntity.of(service.getProviderById(id));
     }
 
+    @GetMapping("/providers/{id}")
+    public ResponseEntity<Provider> getProviderByIDStandard(@PathVariable Long id) {
+        return ResponseEntity.of(service.getProviderById(id));
+    }
+
     @PostMapping("/provider")
     public ResponseEntity<Provider> addProvider(@RequestBody @Valid Provider provider) {
+        return ResponseEntity.of(service.addProvider(provider));
+    }
+
+    @PostMapping("/providers")
+    public ResponseEntity<Provider> addProviderStandard(@RequestBody @Valid Provider provider) {
         return ResponseEntity.of(service.addProvider(provider));
     }
 
@@ -38,9 +48,20 @@ public class ProviderController {
         return ResponseEntity.of(service.updateProvider(id, provider));
     }
 
+    @PutMapping("/providers/{id}")
+    public ResponseEntity<Provider> updateProviderStandard(@PathVariable Long id, @RequestBody Provider provider) {
+        return ResponseEntity.of(service.updateProvider(id, provider));
+    }
+
     @DeleteMapping("/provider/{id}")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT,reason = "Category successfully deleted")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT,reason = "Provider successfully deleted")
     public void deleteProvider(@PathVariable Long id) {
+         service.deleteProvider(id);
+    }
+
+    @DeleteMapping("/providers/{id}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT,reason = "Provider successfully deleted")
+    public void deleteProviderStandard(@PathVariable Long id) {
          service.deleteProvider(id);
     }
 

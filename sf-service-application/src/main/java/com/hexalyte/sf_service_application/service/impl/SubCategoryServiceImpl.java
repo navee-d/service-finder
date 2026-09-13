@@ -7,7 +7,7 @@ import com.hexalyte.sf_service_application.repository.SubCategorySolutionReposit
 import com.hexalyte.sf_service_application.service.SubCategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // 🔧 1. IMPORT THIS
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -20,7 +20,8 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     private final SubCategoryRepository subCategoryRepository;
     private final SubCategorySolutionRepository subCategorySolutionRepository;
 
-    public SubCategoryServiceImpl(SubCategoryRepository subCategoryRepository, SubCategorySolutionRepository subCategorySolutionRepository) {
+    public SubCategoryServiceImpl(SubCategoryRepository subCategoryRepository,
+                                  SubCategorySolutionRepository subCategorySolutionRepository) {
         this.subCategoryRepository = subCategoryRepository;
         this.subCategorySolutionRepository = subCategorySolutionRepository;
     }
@@ -28,16 +29,7 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     @Override
     @Transactional(readOnly = true)
     public List<SubCategory> getSubCategories() {
-        List<SubCategory> subCategories = subCategoryRepository.findAll();
-
-
-        subCategories.forEach(sub -> {
-            if (sub.getCategory() != null) {
-                sub.getCategory().getName();
-            }
-        });
-
-        return subCategories;
+        return subCategoryRepository.findAll();
     }
 
     @Override
@@ -49,7 +41,8 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     @Override
     @Transactional(readOnly = true)
     public List<SubCategorySolution> getSubCategoryServices(Integer id) {
-        List<SubCategorySolution> subCategorySolutions = subCategorySolutionRepository.findBySubCategory_SubCategoryId(id);
+        // FIX: Use findById_SubCategoryId
+        List<SubCategorySolution> subCategorySolutions = subCategorySolutionRepository.findById_SubCategoryId(id);
         if (subCategorySolutions.isEmpty()) return null;
         return subCategorySolutions;
     }
@@ -58,13 +51,11 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     public Optional<SubCategory> addSubCategory(SubCategory subCategory) {
         if (subCategory.getDescription() != null && subCategory.getDescription().isBlank())
             subCategory.setDescription(null);
-
         return Optional.of(subCategoryRepository.save(subCategory));
     }
 
     @Override
-    public Optional<SubCategory> updateSubCategory(SubCategory subCategory, Integer id) {
-
+    public Optional<SubCategory> updateSubCategory(Integer id, SubCategory subCategory) {
         if (subCategory.getDescription() != null && subCategory.getDescription().isBlank())
             subCategory.setDescription(null);
 
@@ -72,19 +63,18 @@ public class SubCategoryServiceImpl implements SubCategoryService {
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find subcategory with such ID")
         );
 
-        updatingSubCategory.setCategory(subCategory.getCategory());
         updatingSubCategory.setName(subCategory.getName());
         updatingSubCategory.setDescription(subCategory.getDescription());
+        updatingSubCategory.setCategory(subCategory.getCategory());
 
         return Optional.of(subCategoryRepository.save(updatingSubCategory));
     }
 
     @Override
     public void deleteSubCategory(Integer id) {
-        subCategoryRepository.delete(
-                subCategoryRepository.findById(id).orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find subcategory with such ID")
-                )
+        SubCategory subCategory = subCategoryRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find subcategory with such ID")
         );
+        subCategoryRepository.delete(subCategory);
     }
 }
